@@ -1,6 +1,7 @@
 import StatCard from '../components/stat-card.gjs';
 import HistoricalComparison from '../components/historical-comparison.gjs';
 import EventList from '../components/event-list.gjs';
+import PriceCharts from '../components/price-charts.gjs';
 import or from '../helpers/or';
 
 <template>
@@ -29,6 +30,8 @@ import or from '../helpers/or';
         @value={{this.controller.avgChangeDisplay}}
       />
     </div>
+
+    <PriceCharts />
 
     {{#if @model.historical}}
       <HistoricalComparison
