@@ -141,7 +141,9 @@ import abs from '../helpers/abs.js';
               as |priceDiff|
             }}
               {{#let
-                (calculatePercentageChange @historical.twoWeeks.price @latestPrice)
+                (calculatePercentageChange
+                  @historical.twoWeeks.price @latestPrice
+                )
                 as |percentChange|
               }}
                 <div
