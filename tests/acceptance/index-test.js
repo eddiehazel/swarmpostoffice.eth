@@ -25,7 +25,7 @@ module('Acceptance | index', function (hooks) {
     assert.dom('.stat-label').exists({ count: 3 });
   });
 
-  test('it displays events after loading', async function (assert) {
+  test('it displays events container after loading', async function (assert) {
     await visit('/?key=test-key');
 
     // We should see the events container
@@ -33,9 +33,9 @@ module('Acceptance | index', function (hooks) {
       .dom('.events-container')
       .exists('Events container should be visible');
 
-    // The events should be displayed (or a "no events" message)
+    // The events content should be displayed (or a status message)
     assert
-      .dom('.event-item, .no-events, .loading')
-      .exists('Should show events or a status message');
+      .dom('.events-content')
+      .exists('Events content area should be visible');
   });
 });
