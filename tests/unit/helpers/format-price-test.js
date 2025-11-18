@@ -24,5 +24,3 @@ module('Integration | Helper | format-price', function (hooks) {
     assert.dom().hasText('-');
   });
 });
-
-

@@ -73,6 +73,7 @@ tests/
 ## API Configuration
 
 The application connects to:
+
 - **Network**: Gnosis Chain (Chain ID: 100)
 - **Contract**: `0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b`
 - **API**: Etherscan API v2 (`https://api.etherscan.io/v2/api`)
@@ -80,6 +81,7 @@ The application connects to:
 ## Development
 
 This project follows Ember.js best practices:
+
 - Modern Octane syntax (Glimmer components, tracked properties)
 - Component-based architecture
 - Service-based API integration

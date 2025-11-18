@@ -1,5 +1,10 @@
 import { module, test } from 'qunit';
-import { calculatePercentageChange, formatPrice, formatDateTime, parseEvent } from 'price-dashboard/utils/price-utils';
+import {
+  calculatePercentageChange,
+  formatPrice,
+  formatDateTime,
+  parseEvent,
+} from 'price-dashboard/utils/price-utils';
 
 module('Unit | Utility | price-utils', function () {
   test('calculatePercentageChange calculates correctly', function (assert) {
@@ -27,7 +32,7 @@ module('Unit | Utility | price-utils', function () {
       blockNumber: '0x100',
       data: '0x3e8', // 1000
       timeStamp: '0x5f3d4800', // 1609459200
-      transactionHash: '0x123'
+      transactionHash: '0x123',
     };
 
     const parsed = parseEvent(event, 900);
@@ -45,7 +50,7 @@ module('Unit | Utility | price-utils', function () {
       blockNumber: '0x100',
       data: '0x3e8',
       timeStamp: '0x5f3d4800',
-      transactionHash: '0x123'
+      transactionHash: '0x123',
     };
 
     const parsed = parseEvent(event, null);
@@ -53,4 +58,3 @@ module('Unit | Utility | price-utils', function () {
     assert.strictEqual(parsed.percentageChange, 0);
   });
 });
-

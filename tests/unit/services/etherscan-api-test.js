@@ -31,10 +31,10 @@ module('Unit | Service | etherscan-api', function (hooks) {
       }
     };
     mockParams.clear();
-    
+
     const key = service.getApiKey();
     assert.strictEqual(key, null);
-    
+
     window.URLSearchParams = originalURLSearchParams;
   });
 
@@ -42,11 +42,10 @@ module('Unit | Service | etherscan-api', function (hooks) {
     const service = this.owner.lookup('service:etherscan-api');
     // Set API key directly for testing
     service.apiKey = 'test-api-key-123';
-    
+
     const key = service.getApiKey();
     assert.strictEqual(key, 'test-api-key-123');
-    
+
     service.apiKey = null;
   });
 });
-

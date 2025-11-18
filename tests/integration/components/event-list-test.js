@@ -41,8 +41,8 @@ module('Integration | Component | event-list', function (hooks) {
         timestamp: 1609459200,
         txHash: '0x123',
         percentageChange: 0,
-        priceChange: 0
-      }
+        priceChange: 0,
+      },
     ]);
 
     await render(hbs`
@@ -52,4 +52,3 @@ module('Integration | Component | event-list', function (hooks) {
     assert.dom('.event-item').exists({ count: 1 });
   });
 });
-

@@ -4,5 +4,3 @@
     {{@message}}
   </div>
 </template>
-
-
