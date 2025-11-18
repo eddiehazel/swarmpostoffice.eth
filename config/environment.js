@@ -5,7 +5,7 @@ module.exports = function (environment) {
     modulePrefix: 'price-dashboard',
     environment,
     rootURL: '/',
-    locationType: 'history',
+    locationType: 'auto',
     EmberENV: {
       EXTEND_PROTOTYPES: false,
       FEATURES: {
@@ -41,7 +41,8 @@ module.exports = function (environment) {
   }
 
   if (environment === 'production') {
-    // here you can enable a production-specific feature
+    // Use hash location for GitHub Pages subdirectory support
+    ENV.locationType = 'hash';
   }
 
   return ENV;
