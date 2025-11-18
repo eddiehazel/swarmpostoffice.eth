@@ -363,7 +363,9 @@
             
             const latestPrice = hexToDecimal(currentEvents[currentEvents.length - 1].data);
             const historicalBlocks = {
+                day: currentLatestBlock - BLOCKS_PER_DAY,
                 week: currentLatestBlock - BLOCKS_PER_WEEK,
+                twoWeeks: currentLatestBlock - (BLOCKS_PER_WEEK * 2),
                 month: currentLatestBlock - BLOCKS_PER_MONTH,
                 threeMonths: currentLatestBlock - (BLOCKS_PER_MONTH * 3),
                 sixMonths: currentLatestBlock - (BLOCKS_PER_MONTH * 6)
@@ -559,7 +561,9 @@
             }
 
             const periods = {
+                day: '1 Day Ago',
                 week: '1 Week Ago',
+                twoWeeks: '2 Weeks Ago',
                 month: '1 Month Ago',
                 threeMonths: '3 Months Ago',
                 sixMonths: '6 Months Ago'

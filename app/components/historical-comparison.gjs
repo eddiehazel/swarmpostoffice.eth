@@ -10,6 +10,65 @@ import abs from '../helpers/abs.js';
 <template>
   {{#if @historical}}
     <div class="stats historical-stats">
+      {{#if @historical.day}}
+        <div class="stat-card historical-card">
+          <div class="stat-label">1 Day Ago</div>
+          <div class="stat-value" style="font-size: 1.3em;">{{formatPrice
+              @historical.day.price
+            }}
+            PLUR</div>
+          {{#if @latestPrice}}
+            {{#let
+              (subtract @latestPrice @historical.day.price)
+              as |priceDiff|
+            }}
+              {{#let
+                (calculatePercentageChange @historical.day.price @latestPrice)
+                as |percentChange|
+              }}
+                <div
+                  class="detail-value
+                    {{if (gt priceDiff 0) 'percentage-increase'}}
+                    {{if (lt priceDiff 0) 'percentage-decrease'}}"
+                  style="margin-top: 8px; font-size: 1.1em;"
+                >
+                  {{if (gt priceDiff 0) "↑"}}
+                  {{if (lt priceDiff 0) "↓"}}
+                  {{formatPrice (abs priceDiff)}}
+                  PLUR
+                </div>
+                <div
+                  class="detail-value
+                    {{if (gt priceDiff 0) 'percentage-increase'}}
+                    {{if (lt priceDiff 0) 'percentage-decrease'}}"
+                  style="font-size: 0.95em;"
+                >
+                  {{if (gt priceDiff 0) "↑"}}
+                  {{if (lt priceDiff 0) "↓"}}
+                  {{formatNumber
+                    (abs percentChange)
+                    minimumFractionDigits=2
+                    maximumFractionDigits=2
+                  }}%
+                </div>
+              {{/let}}
+            {{/let}}
+          {{/if}}
+          <div style="margin-top: 8px; font-size: 0.8em;">
+            <a
+              href="https://gnosisscan.io/block/{{@historical.day.blockNumber}}"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: #667eea; text-decoration: none;"
+            >
+              Block #{{formatNumber @historical.day.blockNumber}}
+            </a>
+          </div>
+          <div style="font-size: 0.75em; color: #888; margin-top: 4px;">
+            {{formatDateTime @historical.day.timestamp}}
+          </div>
+        </div>
+      {{/if}}
       {{#if @historical.week}}
         <div class="stat-card historical-card">
           <div class="stat-label">1 Week Ago</div>
@@ -66,6 +125,65 @@ import abs from '../helpers/abs.js';
           </div>
           <div style="font-size: 0.75em; color: #888; margin-top: 4px;">
             {{formatDateTime @historical.week.timestamp}}
+          </div>
+        </div>
+      {{/if}}
+      {{#if @historical.twoWeeks}}
+        <div class="stat-card historical-card">
+          <div class="stat-label">2 Weeks Ago</div>
+          <div class="stat-value" style="font-size: 1.3em;">{{formatPrice
+              @historical.twoWeeks.price
+            }}
+            PLUR</div>
+          {{#if @latestPrice}}
+            {{#let
+              (subtract @latestPrice @historical.twoWeeks.price)
+              as |priceDiff|
+            }}
+              {{#let
+                (calculatePercentageChange @historical.twoWeeks.price @latestPrice)
+                as |percentChange|
+              }}
+                <div
+                  class="detail-value
+                    {{if (gt priceDiff 0) 'percentage-increase'}}
+                    {{if (lt priceDiff 0) 'percentage-decrease'}}"
+                  style="margin-top: 8px; font-size: 1.1em;"
+                >
+                  {{if (gt priceDiff 0) "↑"}}
+                  {{if (lt priceDiff 0) "↓"}}
+                  {{formatPrice (abs priceDiff)}}
+                  PLUR
+                </div>
+                <div
+                  class="detail-value
+                    {{if (gt priceDiff 0) 'percentage-increase'}}
+                    {{if (lt priceDiff 0) 'percentage-decrease'}}"
+                  style="font-size: 0.95em;"
+                >
+                  {{if (gt priceDiff 0) "↑"}}
+                  {{if (lt priceDiff 0) "↓"}}
+                  {{formatNumber
+                    (abs percentChange)
+                    minimumFractionDigits=2
+                    maximumFractionDigits=2
+                  }}%
+                </div>
+              {{/let}}
+            {{/let}}
+          {{/if}}
+          <div style="margin-top: 8px; font-size: 0.8em;">
+            <a
+              href="https://gnosisscan.io/block/{{@historical.twoWeeks.blockNumber}}"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: #667eea; text-decoration: none;"
+            >
+              Block #{{formatNumber @historical.twoWeeks.blockNumber}}
+            </a>
+          </div>
+          <div style="font-size: 0.75em; color: #888; margin-top: 4px;">
+            {{formatDateTime @historical.twoWeeks.timestamp}}
           </div>
         </div>
       {{/if}}
