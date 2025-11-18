@@ -1,11 +1,13 @@
 # Price Update Events Dashboard - Rebuild Prompt
 
 ## Project Overview
+
 Create a dynamic, auto-refreshing HTML dashboard that displays price update events from a Gnosis Chain smart contract. The dashboard monitors PriceUpdate events emitted by a price oracle contract and presents them with historical comparisons, animations, and detailed statistics.
 
 ## Technical Specifications
 
 ### Contract Details
+
 - **Contract Address**: `0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b`
 - **Network**: Gnosis Chain (Chain ID: 100)
 - **Event**: `PriceUpdate(uint256 price)`
@@ -13,13 +15,15 @@ Create a dynamic, auto-refreshing HTML dashboard that displays price update even
 - **Deployment Block**: ~37339192
 
 ### API Configuration
+
 - **API Endpoint**: Etherscan API v2 (`https://api.etherscan.io/v2/api`)
-- **Required Parameters**: 
+- **Required Parameters**:
   - `chainid=100` (Gnosis Chain)
   - `apikey` (user's Etherscan API key)
 - **Primary Endpoint Used**: `logs/getLogs` for fetching event logs
 
 ### Blockchain Constants (Gnosis Chain)
+
 - **Block Time**: ~5 seconds per block
 - **Blocks Per Hour**: ~720 blocks
 - **Blocks Per Day**: ~17,280 blocks
@@ -29,6 +33,7 @@ Create a dynamic, auto-refreshing HTML dashboard that displays price update even
 ## Core Features
 
 ### 1. Real-Time Event Display
+
 - **Display Count**: Last 50 PriceUpdate events
 - **Sort Order**: Reverse chronological (newest events at top)
 - **Auto-Refresh**: Every 30 seconds
@@ -41,25 +46,31 @@ Create a dynamic, auto-refreshing HTML dashboard that displays price update even
   - Color-coded changes (green for increase, red for decrease)
 
 ### 2. Animated Updates
+
 - **New Event Detection**: Compare transaction hashes between refreshes
 - **Animation**: Slide-in effect (0.5s duration, ease-out)
 - **Visual Highlight**: Subtle blue gradient background for new events
 - **CSS Animation**: `translateY(-20px)` to `translateY(0)` with opacity fade-in
 
 ### 3. Statistics Dashboard
+
 Three main statistics cards:
+
 - **Total Events**: Count of fetched events
 - **Latest Price**: Most recent price in PLUR
 - **Average Change**: Mean percentage change across all events
 
 ### 4. Historical Price Comparisons
+
 Four time-based comparison cards showing price changes from:
+
 - **1 Week Ago** (~120,960 blocks back)
 - **1 Month Ago** (~518,400 blocks back)
 - **3 Months Ago** (~1,555,200 blocks back)
 - **6 Months Ago** (~3,110,400 blocks back)
 
 Each historical card displays:
+
 - Historical price at that time
 - Absolute price change in PLUR
 - Percentage change
@@ -68,13 +79,16 @@ Each historical card displays:
 - Color-coded indicators (green/red for up/down)
 
 ### 5. Smart Data Fetching
+
 **Initial Load Process**:
+
 1. Fetch current latest block number using `eth_blockNumber`
 2. Calculate optimal block range (go back ~50,000 blocks or ~7 days)
 3. Fetch last 50 events from calculated range
 4. Parse events and extract price data
 
 **Historical Data Process**:
+
 1. Calculate target blocks for each historical period
 2. For each period, fetch events from ±500 blocks around target
 3. Find closest event to target block
@@ -83,7 +97,8 @@ Each historical card displays:
 ## Design Requirements
 
 ### Visual Design
-- **Color Scheme**: 
+
+- **Color Scheme**:
   - Primary gradient: Purple to violet (`#667eea` to `#764ba2`)
   - Background: Gradient background
   - Cards: White with subtle shadows
@@ -103,6 +118,7 @@ Each historical card displays:
   - Adequate spacing and padding
 
 ### Responsive Design
+
 - Mobile-friendly layout
 - Stacked cards on small screens
 - Readable font sizes across devices
@@ -110,18 +126,22 @@ Each historical card displays:
 ## Data Processing Logic
 
 ### Price Change Calculation
+
 ```
 percentageChange = ((newPrice - oldPrice) / oldPrice) * 100
 priceChange = newPrice - oldPrice
 ```
 
 ### Hex to Decimal Conversion
+
 All blockchain data comes in hex format and must be converted:
+
 - Block numbers: `parseInt(hex, 16)`
 - Timestamps: `parseInt(hex, 16)`
 - Price data: `parseInt(hex, 16)`
 
 ### Event Parsing Order
+
 1. Fetch events (newest to oldest from API)
 2. Sort oldest to newest for calculations
 3. Calculate changes comparing to previous event
@@ -130,6 +150,7 @@ All blockchain data comes in hex format and must be converted:
 ## API Call Structure
 
 ### Fetching Events
+
 ```
 GET https://api.etherscan.io/v2/api
   ?chainid=100
@@ -145,6 +166,7 @@ GET https://api.etherscan.io/v2/api
 ```
 
 ### Fetching Current Block
+
 ```
 GET https://api.etherscan.io/v2/api
   ?chainid=100
@@ -156,17 +178,20 @@ GET https://api.etherscan.io/v2/api
 ## User Experience Features
 
 ### Loading States
+
 - Spinner animation during data fetch
 - Loading message
 - Error handling with user-friendly messages
 
 ### Interactive Elements
+
 - Clickable transaction hashes linking to GnosisScan
 - Clickable block numbers linking to GnosisScan
 - Hover effects on event cards
 - Smooth transitions and animations
 
 ### Auto-Refresh Behavior
+
 - Non-intrusive updates every 30 seconds
 - Maintains scroll position
 - Highlights only genuinely new events
@@ -175,30 +200,37 @@ GET https://api.etherscan.io/v2/api
 ## Implementation Notes
 
 ### Single-File Architecture
+
 Everything should be in one HTML file:
+
 - Inline CSS in `<style>` tags
 - Inline JavaScript in `<script>` tags
 - No external dependencies except API calls
 
 ### Security Considerations
+
 - API key embedded in JavaScript (client-side only)
 - No server-side code required
 - Direct API calls from browser
 
 ### Error Handling
+
 - Network errors: Display error message
 - API errors: Log to console and show user-friendly message
 - Missing data: Show placeholder text ("-")
 - Graceful degradation if historical data unavailable
 
 ### Performance Optimization
+
 - Batch API calls where possible
 - Cache block timestamps when available
 - Limit event display to 50 items
 - Efficient DOM updates (innerHTML once per refresh)
 
 ## Expected File Output
+
 A single `price_updates.html` file that:
+
 - Opens directly in any modern browser
 - Requires no installation or build process
 - Works with just an internet connection
@@ -207,6 +239,7 @@ A single `price_updates.html` file that:
 - Provides historical context with price comparisons
 
 ## Testing Checklist
+
 - [ ] Events load correctly on first load
 - [ ] 50 most recent events are displayed
 - [ ] Events are in reverse chronological order (newest first)
@@ -220,6 +253,7 @@ A single `price_updates.html` file that:
 - [ ] Error states display properly
 
 ## Additional Context
+
 This dashboard monitors a Swarm network price oracle contract that adjusts storage prices based on network redundancy. The PriceUpdate events represent automatic price adjustments made by the oracle system. Understanding price trends over time helps network participants anticipate storage costs and network health.
 
 ---

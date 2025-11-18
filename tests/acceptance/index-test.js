@@ -13,7 +13,9 @@ module('Acceptance | index', function (hooks) {
 
   test('it displays contract information', async function (assert) {
     await visit('/?key=test-key');
-    assert.dom('.contract-info').includesText('0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b');
+    assert
+      .dom('.contract-info')
+      .includesText('0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b');
     assert.dom('.contract-info').includesText('Gnosis Chain');
   });
 
@@ -23,4 +25,3 @@ module('Acceptance | index', function (hooks) {
     assert.dom('.stat-label').exists({ count: 3 });
   });
 });
-

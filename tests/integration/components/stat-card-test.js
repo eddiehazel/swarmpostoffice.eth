@@ -25,5 +25,3 @@ module('Integration | Component | stat-card', function (hooks) {
     assert.dom('.stat-value').exists();
   });
 });
-
-

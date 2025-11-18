@@ -13,7 +13,7 @@ module('Integration | Component | event-item', function (hooks) {
       timestamp: 1609459200,
       txHash: '0x1234567890abcdef',
       percentageChange: 5.5,
-      priceChange: 50
+      priceChange: 50,
     });
 
     await render(hbs`
@@ -32,7 +32,7 @@ module('Integration | Component | event-item', function (hooks) {
       timestamp: 1609459200,
       txHash: '0x1234567890abcdef',
       percentageChange: 0,
-      priceChange: 0
+      priceChange: 0,
     });
 
     await render(hbs`
@@ -49,7 +49,7 @@ module('Integration | Component | event-item', function (hooks) {
       timestamp: 1609459200,
       txHash: '0x1234567890abcdef',
       percentageChange: 5.5,
-      priceChange: 50
+      priceChange: 50,
     });
 
     await render(hbs`
@@ -59,5 +59,3 @@ module('Integration | Component | event-item', function (hooks) {
     assert.dom('.detail-label').exists({ count: 4 });
   });
 });
-
-

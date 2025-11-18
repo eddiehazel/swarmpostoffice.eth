@@ -16,9 +16,11 @@ export default class IndexController extends Controller {
     if (!this.model?.events || this.previousEventHashes.length === 0) {
       return [];
     }
-    
-    const currentHashes = this.model.events.map(e => e.txHash);
-    return currentHashes.filter(hash => !this.previousEventHashes.includes(hash));
+
+    const currentHashes = this.model.events.map((e) => e.txHash);
+    return currentHashes.filter(
+      (hash) => !this.previousEventHashes.includes(hash)
+    );
   }
 
   get latestPriceDisplay() {
@@ -34,26 +36,26 @@ export default class IndexController extends Controller {
   @action
   async refresh() {
     const etherscanApi = this.owner.lookup('service:etherscan-api');
-    
+
     try {
       this.isLoading = true;
       this.error = null;
 
       // Store previous hashes for animation detection
       if (this.model?.events) {
-        this.previousEventHashes = this.model.events.map(e => e.txHash);
+        this.previousEventHashes = this.model.events.map((e) => e.txHash);
       }
 
       // Fetch events
       const { events, currentBlock } = await etherscanApi.fetchPriceEvents(50);
-      
+
       if (!events || events.length === 0) {
         this.model = {
           events: [],
           stats: { totalEvents: 0, latestPrice: 0, avgChange: 0 },
           historical: null,
           currentBlock: null,
-          newEventHashes: []
+          newEventHashes: [],
         };
         return;
       }
@@ -65,9 +67,8 @@ export default class IndexController extends Controller {
           return hexToDecimal(a.blockNumber) - hexToDecimal(b.blockNumber);
         })
         .map((event, index) => {
-          const previousPrice = index > 0 
-            ? parseInt(events[index - 1].data, 16) 
-            : null;
+          const previousPrice =
+            index > 0 ? parseInt(events[index - 1].data, 16) : null;
           return parseEvent(event, previousPrice);
         });
 
@@ -78,11 +79,12 @@ export default class IndexController extends Controller {
       const totalEvents = parsedEvents.length;
       const latestPrice = parsedEvents[parsedEvents.length - 1].price;
       const changes = parsedEvents
-        .map(e => parseFloat(e.percentageChange))
-        .filter(c => c !== 0);
-      const avgChange = changes.length > 0
-        ? (changes.reduce((a, b) => a + b, 0) / changes.length).toFixed(2)
-        : 0;
+        .map((e) => parseFloat(e.percentageChange))
+        .filter((c) => c !== 0);
+      const avgChange =
+        changes.length > 0
+          ? (changes.reduce((a, b) => a + b, 0) / changes.length).toFixed(2)
+          : 0;
 
       // Get historical data
       const historical = await etherscanApi.getHistoricalPrices(currentBlock);
@@ -92,11 +94,11 @@ export default class IndexController extends Controller {
         stats: {
           totalEvents,
           latestPrice,
-          avgChange
+          avgChange,
         },
         historical,
         currentBlock,
-        newEventHashes: this.newEventHashes
+        newEventHashes: this.newEventHashes,
       };
     } catch (error) {
       this.error = error.message;
@@ -106,4 +108,3 @@ export default class IndexController extends Controller {
     }
   }
 }
-

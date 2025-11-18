@@ -6,5 +6,3 @@ export default helper(function length([value]) {
   }
   return 0;
 });
-
-

@@ -4,5 +4,3 @@
     <div class="stat-value">{{@value}}</div>
   </div>
 </template>
-
-
