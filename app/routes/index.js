@@ -3,16 +3,6 @@ import { getOwner } from '@ember/owner';
 import { parseEvent } from '../utils/price-utils';
 
 export default class IndexRoute extends Route {
-  beforeModel() {
-    // Reset loading state before entering the route
-    // This ensures tests start with a clean state
-    // Use controllerFor to get the controller (creates it if it doesn't exist)
-    const controller = this.controllerFor('index');
-    controller.isInitialLoading = true;
-    controller.isLoading = false;
-    controller.error = null;
-  }
-
   model() {
     // Return empty model immediately to allow template to render with loading screen
     return {
