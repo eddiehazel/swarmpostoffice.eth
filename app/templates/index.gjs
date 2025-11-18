@@ -22,7 +22,7 @@ import or from '../helpers/or';
       <div class="stats">
         <StatCard
           @label="Total Events"
-          @value={{or @model.stats.totalEvents "-"}}
+          @value={{or this.controller.model.stats.totalEvents "-"}}
         />
         <StatCard
           @label="Latest Price"
@@ -34,17 +34,17 @@ import or from '../helpers/or';
         />
       </div>
 
-      {{#if @model.historical}}
+      {{#if this.controller.model.historical}}
         <HistoricalComparison
-          @historical={{@model.historical}}
-          @latestPrice={{@model.stats.latestPrice}}
+          @historical={{this.controller.model.historical}}
+          @latestPrice={{this.controller.model.stats.latestPrice}}
         />
       {{/if}}
 
       <EventList
-        @events={{@model.events}}
+        @events={{this.controller.model.events}}
         @isLoading={{this.controller.isLoading}}
-        @error={{or @model.error this.controller.error}}
+        @error={{or this.controller.model.error this.controller.error}}
         @newEventHashes={{this.controller.newEventHashes}}
       />
     </div>
