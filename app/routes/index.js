@@ -14,15 +14,11 @@ export default class IndexRoute extends Route {
     };
   }
 
-  setupController(controller, model) {
+  async setupController(controller, model) {
     super.setupController(controller, model);
 
-    // Reset loading state for this route entry
-    controller.isInitialLoading = true;
-
-    // Load data asynchronously after template has rendered with loading screen
-    // Note: NOT awaiting this so the route activates immediately with the loading screen
-    this.loadInitialData(controller);
+    // Load initial data
+    await this.loadInitialData(controller);
 
     // Set up auto-refresh every 30 seconds
     this.refreshTimer = setInterval(() => {
@@ -46,7 +42,6 @@ export default class IndexRoute extends Route {
           currentBlock: null,
           newEventHashes: [],
         };
-        controller.isInitialLoading = false;
         return;
       }
 
@@ -101,16 +96,12 @@ export default class IndexRoute extends Route {
         error: error.message,
       };
       console.error('Error loading initial data:', error);
-    } finally {
-      // Mark initial loading as complete
-      controller.isInitialLoading = false;
     }
   }
 
   resetController(controller, isExiting) {
     if (isExiting) {
       // Reset controller state when leaving the route
-      controller.isInitialLoading = true;
       controller.isLoading = false;
       controller.error = null;
       controller.previousEventHashes = [];
