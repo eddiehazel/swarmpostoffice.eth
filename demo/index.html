@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Update Events - Gnosis Chain</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .contract-info {
+            color: #666;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            color: #333;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .events-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .events-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .events-title {
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .refresh-info {
+            color: #888;
+            font-size: 0.85em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 1.2em;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .new-event {
+            animation: slideIn 0.5s ease-out;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%) !important;
+        }
+
+        .event-item {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .event-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .event-time {
+            font-size: 1.1em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .price-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .event-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            color: #888;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .percentage-increase {
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.3em;
+        const CHAIN_ID = 100; // Gnosis Chain ID
+        // PriceUpdate(uint256) event signature hash
+        const CHAIN_ID = 100; // Gnosis Chain ID
+        // PriceUpdate(uint256) event signature hash
+        }
+
+        .percentage-decrease {
+            color: #ef4444;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 8px;
+            padding: 20px;
+            color: #c33;
+            text-align: center;
+        }
+
+        .no-events {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .event-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 Price Update Events</h1>
+            <div class="contract-info">
+                Contract: <strong>0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b</strong><br>
+                Network: <strong>Gnosis Chain</strong>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Events</div>
+                <div class="stat-value" id="totalEvents">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Latest Price</div>
+                <div class="stat-value" id="latestPrice">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Change</div>
+                <div class="stat-value" id="avgChange">-</div>
+            </div>
+        </div>
+
+        <div id="historicalComparison" class="stats" style="margin-bottom: 30px;">
+            <!-- Historical comparison will be inserted here -->
+        </div>
+
+        <div class="events-container">
+            <div class="events-header">
+                <h2 class="events-title">Last 50 Price Updates</h2>
+            </div>
+            <div id="eventsContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading price events...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONTRACT_ADDRESS = '0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b';
+        const API_BASE = 'https://api.etherscan.io/v2/api';
+	const params = new URLSearchParams(window.location.search);
+        const API_KEY = params.get("key");
+        const CHAIN_ID = 100; // Gnosis Chain ID
+        // PriceUpdate(uint256) event signature hash
+        const PRICE_UPDATE_TOPIC = '0xae46785019700e30375a5d7b4f91e32f8060ef085111f896ebf889450aa2ab5a';
+        const MAX_EVENTS = 50; // Show last 50 events
+        
+        // Gnosis Chain: ~5 second block time = ~12 blocks per minute = ~720 blocks per hour
+        const BLOCKS_PER_HOUR = 720;
+        const BLOCKS_PER_DAY = BLOCKS_PER_HOUR * 24;
+        const BLOCKS_PER_WEEK = BLOCKS_PER_DAY * 7;
+        const BLOCKS_PER_MONTH = BLOCKS_PER_DAY * 30;
+        
+        let previousEvents = [];
+        let currentLatestBlock = null;
+
+        async function getCurrentBlock() {
+            try {
+                const response = await fetch(`${API_BASE}?chainid=${CHAIN_ID}&module=proxy&action=eth_blockNumber&apikey=${API_KEY}`);
+                const data = await response.json();
+                if (data.result) {
+                    return hexToDecimal(data.result);
+                }
+            } catch (error) {
+                console.error('Error fetching current block:', error);
+            }
+            return null;
+        }
+
+        async function fetchPriceEvents() {
+            try {
+                // Get current block
+                currentLatestBlock = await getCurrentBlock();
+                if (!currentLatestBlock) {
+                    throw new Error('Could not fetch current block');
+                }
+                
+                console.log('Current block:', currentLatestBlock);
+                
+                // Calculate block range - go back enough to get 50+ events
+                // Assuming events happen frequently, go back 50000 blocks (~7 days)
+                const fromBlock = Math.max(37339192, currentLatestBlock - 50000);
+                
+                const url = `${API_BASE}?chainid=${CHAIN_ID}&module=logs&action=getLogs&fromBlock=${fromBlock}&toBlock=${currentLatestBlock}&address=${CONTRACT_ADDRESS}&topic0=${PRICE_UPDATE_TOPIC}&page=1&offset=1000&apikey=${API_KEY}`;
+                
+                console.log('Fetching events from block', fromBlock, 'to', currentLatestBlock);
+                const response = await fetch(url);
+                const data = await response.json();
+
+                console.log('API Response:', data);
+
+                if (data.status === '1' && Array.isArray(data.result)) {
+                    // Sort by block number descending and take only the last 50
+                    const sortedEvents = data.result.sort((a, b) => 
+                        hexToDecimal(b.blockNumber) - hexToDecimal(a.blockNumber)
+                    );
+                    return sortedEvents.slice(0, MAX_EVENTS);
+                } else if (data.result && typeof data.result === 'string') {
+                    throw new Error(data.result);
+                } else {
+                    throw new Error(data.message || 'Failed to fetch events');
+                }
+            } catch (error) {
+                console.error('Error fetching price events:', error);
+                throw error;
+            }
+        }
+
+        async function getHistoricalPrices(currentEvents) {
+            if (!currentLatestBlock || currentEvents.length === 0) return null;
+            
+            const latestPrice = hexToDecimal(currentEvents[currentEvents.length - 1].data);
+            const historicalBlocks = {
+                week: currentLatestBlock - BLOCKS_PER_WEEK,
+                month: currentLatestBlock - BLOCKS_PER_MONTH,
+                threeMonths: currentLatestBlock - (BLOCKS_PER_MONTH * 3),
+                sixMonths: currentLatestBlock - (BLOCKS_PER_MONTH * 6)
+            };
+            
+            const historical = {};
+            
+            // Fetch events from each historical period
+            for (const [period, targetBlock] of Object.entries(historicalBlocks)) {
+                try {
+                    // Fetch events around the historical block (±500 blocks buffer)
+                    const fromBlock = Math.max(37339192, targetBlock - 500);
+                    const toBlock = targetBlock + 500;
+                    
+                    const url = `${API_BASE}?chainid=${CHAIN_ID}&module=logs&action=getLogs&fromBlock=${fromBlock}&toBlock=${toBlock}&address=${CONTRACT_ADDRESS}&topic0=${PRICE_UPDATE_TOPIC}&page=1&offset=100&apikey=${API_KEY}`;
+                    
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data.status === '1' && Array.isArray(data.result) && data.result.length > 0) {
+                        // Find the closest event to the target block
+                        let closestEvent = null;
+                        let minDiff = Infinity;
+                        
+                        for (const event of data.result) {
+                            const eventBlock = hexToDecimal(event.blockNumber);
+                            const diff = Math.abs(eventBlock - targetBlock);
+                            if (diff < minDiff) {
+                                minDiff = diff;
+                                closestEvent = event;
+                            }
+                        }
+                        
+                        if (closestEvent) {
+                            const historicalPrice = hexToDecimal(closestEvent.data);
+                            const priceDiff = latestPrice - historicalPrice;
+                            const percentChange = calculatePercentageChange(historicalPrice, latestPrice);
+                            
+                            historical[period] = {
+                                price: historicalPrice,
+                                priceDiff: priceDiff,
+                                percentChange: percentChange,
+                                blockNumber: hexToDecimal(closestEvent.blockNumber),
+                                timestamp: hexToDecimal(closestEvent.timeStamp)
+                            };
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error fetching ${period} historical data:`, error);
+                }
+            }
+            
+            return historical;
+        }
+
+        function hexToDecimal(hex) {
+            return parseInt(hex, 16);
+        }
+
+        function formatDateTime(timestamp) {
+            const date = new Date(timestamp * 1000);
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        function calculatePercentageChange(oldPrice, newPrice) {
+            if (oldPrice === 0) return 0;
+            return ((newPrice - oldPrice) / oldPrice * 100).toFixed(2);
+        }
+
+        function formatPrice(price) {
+            return price.toLocaleString();
+        }
+
+        async function displayEvents(events) {
+            const eventsContent = document.getElementById('eventsContent');
+            
+            if (!events || events.length === 0) {
+                eventsContent.innerHTML = '<div class="no-events">No price update events found.</div>';
+                updateStats([], 0, 0);
+                return;
+            }
+
+            // Sort events by block number (oldest first for display)
+            events.sort((a, b) => hexToDecimal(a.blockNumber) - hexToDecimal(b.blockNumber));
+
+            // Parse events and calculate changes
+            const parsedEvents = events.map((event, index) => {
+                const blockNumber = hexToDecimal(event.blockNumber);
+                const price = hexToDecimal(event.data);
+                const timestamp = hexToDecimal(event.timeStamp);
+                
+                let percentageChange = 0;
+                let priceChange = 0;
+                let previousPrice = 0;
+                if (index > 0) {
+                    previousPrice = hexToDecimal(events[index - 1].data);
+                    priceChange = price - previousPrice;
+                    percentageChange = calculatePercentageChange(previousPrice, price);
+                }
+
+                return {
+                    blockNumber,
+                    price,
+                    timestamp,
+                    percentageChange,
+                    priceChange,
+                    previousPrice,
+                    txHash: event.transactionHash
+                };
+            });
+
+            // Calculate statistics
+            const totalEvents = parsedEvents.length;
+            const latestPrice = parsedEvents[parsedEvents.length - 1].price;
+            const changes = parsedEvents.map(e => parseFloat(e.percentageChange)).filter(c => c !== 0);
+            const avgChange = changes.length > 0 ? (changes.reduce((a, b) => a + b, 0) / changes.length).toFixed(2) : 0;
+
+            updateStats(parsedEvents, latestPrice, avgChange);
+
+            // Get historical price data
+            const historical = await getHistoricalPrices(events);
+            displayHistoricalComparison(historical, latestPrice);
+
+            // Check for new events
+            const newEventHashes = parsedEvents.map(e => e.txHash);
+            const previousEventHashes = previousEvents.map(e => e.txHash);
+            const newEvents = parsedEvents.filter(e => !previousEventHashes.includes(e.txHash));
+
+            // Display events (reverse order so newest on top)
+            let html = '';
+            for (let i = parsedEvents.length - 1; i >= 0; i--) {
+                const event = parsedEvents[i];
+                const isNew = newEvents.some(ne => ne.txHash === event.txHash);
+                const changeClass = event.percentageChange > 0 ? 'percentage-increase' : 
+                                  event.percentageChange < 0 ? 'percentage-decrease' : '';
+                const changeSymbol = event.percentageChange > 0 ? '↑' : 
+                                   event.percentageChange < 0 ? '↓' : '';
+                
+                html += `
+                    <div class="event-item ${isNew ? 'new-event' : ''}" style="${isNew ? 'animation: slideIn 0.5s ease-out;' : ''}">
+                        <div class="event-header">
+                            <div class="event-time">${formatDateTime(event.timestamp)}</div>
+                            <div class="price-badge">Price: ${formatPrice(event.price)} PLUR</div>
+                        </div>
+                        <div class="event-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Block Number</div>
+                                <div class="detail-value">${event.blockNumber.toLocaleString()}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Transaction Hash</div>
+                                <div class="detail-value" style="font-size: 0.85em;">
+                                    <a href="https://gnosisscan.io/tx/${event.txHash}" target="_blank" style="color: #667eea; text-decoration: none;">
+                                        ${event.txHash.substring(0, 10)}...${event.txHash.substring(event.txHash.length - 8)}
+                                    </a>
+                                </div>
+                            </div>
+                            ${i > 0 ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Change from Previous</div>
+                                <div class="detail-value ${changeClass}">
+                                    ${changeSymbol} ${Math.abs(event.percentageChange)}%
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Price Change (PLUR)</div>
+                                <div class="detail-value ${changeClass}">
+                                    ${changeSymbol} ${formatPrice(Math.abs(event.priceChange))}
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            eventsContent.innerHTML = html;
+            previousEvents = parsedEvents;
+        }
+
+        function displayHistoricalComparison(historical, latestPrice) {
+            const container = document.getElementById('historicalComparison');
+            if (!historical || Object.keys(historical).length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const periods = {
+                week: '1 Week Ago',
+                month: '1 Month Ago',
+                threeMonths: '3 Months Ago',
+                sixMonths: '6 Months Ago'
+            };
+
+            let html = '';
+            for (const [key, label] of Object.entries(periods)) {
+                if (historical[key]) {
+                    const data = historical[key];
+                    const changeClass = data.priceDiff > 0 ? 'percentage-increase' : 
+                                      data.priceDiff < 0 ? 'percentage-decrease' : '';
+                    const changeSymbol = data.priceDiff > 0 ? '↑' : 
+                                       data.priceDiff < 0 ? '↓' : '';
+                    
+                    html += `
+                        <div class="stat-card">
+                            <div class="stat-label">${label}</div>
+                            <div class="stat-value" style="font-size: 1.3em;">${formatPrice(data.price)} PLUR</div>
+                            <div class="detail-value ${changeClass}" style="margin-top: 8px; font-size: 1.1em;">
+                                ${changeSymbol} ${formatPrice(Math.abs(data.priceDiff))} PLUR
+                            </div>
+                            <div class="detail-value ${changeClass}" style="font-size: 0.95em;">
+                                ${changeSymbol} ${Math.abs(data.percentChange)}%
+                            </div>
+                            <div style="margin-top: 8px; font-size: 0.8em;">
+                                <a href="https://gnosisscan.io/block/${data.blockNumber}" target="_blank" style="color: #667eea; text-decoration: none;">
+                                    Block #${data.blockNumber.toLocaleString()}
+                                </a>
+                            </div>
+                            <div style="font-size: 0.75em; color: #888; margin-top: 4px;">
+                                ${formatDateTime(data.timestamp)}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            container.innerHTML = html;
+        }
+
+        function updateStats(events, latestPrice, avgChange) {
+            document.getElementById('totalEvents').textContent = events.length || '-';
+            document.getElementById('latestPrice').textContent = latestPrice ? formatPrice(latestPrice) + ' PLUR' : '-';
+            document.getElementById('avgChange').textContent = avgChange ? `${avgChange}%` : '-';
+        }
+
+        async function refresh() {
+            try {
+                const events = await fetchPriceEvents();
+                await displayEvents(events);
+            } catch (error) {
+                const eventsContent = document.getElementById('eventsContent');
+                eventsContent.innerHTML = `
+                    <div class="error">
+                        <strong>Error loading events:</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Initial load
+        refresh();
+
+        // Auto-refresh every 300 seconds
+        // setInterval(refresh, 300000);
+    </script>
+</body>
+</html>
