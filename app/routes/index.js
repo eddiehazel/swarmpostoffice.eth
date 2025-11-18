@@ -3,6 +3,16 @@ import { getOwner } from '@ember/owner';
 import { parseEvent } from '../utils/price-utils';
 
 export default class IndexRoute extends Route {
+  beforeModel() {
+    // Reset loading state before entering the route
+    // This ensures tests start with a clean state
+    // Use controllerFor to get the controller (creates it if it doesn't exist)
+    const controller = this.controllerFor('index');
+    controller.isInitialLoading = true;
+    controller.isLoading = false;
+    controller.error = null;
+  }
+
   model() {
     // Return empty model immediately to allow template to render with loading screen
     return {
@@ -14,11 +24,15 @@ export default class IndexRoute extends Route {
     };
   }
 
-  async setupController(controller, model) {
+  setupController(controller, model) {
     super.setupController(controller, model);
 
+    // Reset loading state for this route entry
+    controller.isInitialLoading = true;
+
     // Load data asynchronously after template has rendered with loading screen
-    await this.loadInitialData(controller);
+    // Note: NOT awaiting this so the route activates immediately with the loading screen
+    this.loadInitialData(controller);
 
     // Set up auto-refresh every 30 seconds
     this.refreshTimer = setInterval(() => {
@@ -100,6 +114,16 @@ export default class IndexRoute extends Route {
     } finally {
       // Mark initial loading as complete
       controller.isInitialLoading = false;
+    }
+  }
+
+  resetController(controller, isExiting) {
+    if (isExiting) {
+      // Reset controller state when leaving the route
+      controller.isInitialLoading = true;
+      controller.isLoading = false;
+      controller.error = null;
+      controller.previousEventHashes = [];
     }
   }
 

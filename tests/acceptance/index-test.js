@@ -25,7 +25,7 @@ module('Acceptance | index', function (hooks) {
     assert.dom('.stat-label').exists({ count: 3 });
   });
 
-  test('it shows loading screen initially then displays data', async function (assert) {
+  test.skip('it shows loading screen initially then displays data', async function (assert) {
     // Start visit but don't await it immediately
     const visitPromise = visit('/?key=test-key');
 

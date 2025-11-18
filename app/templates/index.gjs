@@ -10,7 +10,7 @@ import or from '../helpers/or';
   {{else}}
     <div class="container">
       <div class="header">
-        <h1>🔔 Price Update Events</h1>
+        <h1>🔔 PRICE UPDATE EVENTS</h1>
         <div class="contract-info">
           Contract:
           <strong>0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b</strong><br />
