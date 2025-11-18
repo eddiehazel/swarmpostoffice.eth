@@ -3,7 +3,30 @@ import { getOwner } from '@ember/owner';
 import { parseEvent } from '../utils/price-utils';
 
 export default class IndexRoute extends Route {
-  async model() {
+  model() {
+    // Return empty model immediately to allow template to render with loading screen
+    return {
+      events: [],
+      stats: { totalEvents: 0, latestPrice: 0, avgChange: 0 },
+      historical: null,
+      currentBlock: null,
+      newEventHashes: [],
+    };
+  }
+
+  async setupController(controller, model) {
+    super.setupController(controller, model);
+
+    // Load initial data
+    await this.loadInitialData(controller);
+
+    // Set up auto-refresh every 30 seconds
+    this.refreshTimer = setInterval(() => {
+      controller.refresh();
+    }, 30000);
+  }
+
+  async loadInitialData(controller) {
     const owner = getOwner(this);
     const etherscanApi = owner.lookup('service:etherscan-api');
 
@@ -12,13 +35,14 @@ export default class IndexRoute extends Route {
       const { events, currentBlock } = await etherscanApi.fetchPriceEvents(50);
 
       if (!events || events.length === 0) {
-        return {
+        controller.model = {
           events: [],
           stats: { totalEvents: 0, latestPrice: 0, avgChange: 0 },
           historical: null,
           currentBlock: null,
           newEventHashes: [],
         };
+        return;
       }
 
       // Parse events and calculate changes
@@ -50,7 +74,7 @@ export default class IndexRoute extends Route {
       // Get historical data
       const historical = await etherscanApi.getHistoricalPrices(currentBlock);
 
-      return {
+      controller.model = {
         events: displayEvents,
         stats: {
           totalEvents,
@@ -62,8 +86,8 @@ export default class IndexRoute extends Route {
         newEventHashes: [],
       };
     } catch (error) {
-      this.error = error.message;
-      return {
+      controller.error = error.message;
+      controller.model = {
         events: [],
         stats: { totalEvents: 0, latestPrice: 0, avgChange: 0 },
         historical: null,
@@ -71,16 +95,17 @@ export default class IndexRoute extends Route {
         newEventHashes: [],
         error: error.message,
       };
+      console.error('Error loading initial data:', error);
     }
   }
 
-  setupController(controller, model) {
-    super.setupController(controller, model);
-
-    // Set up auto-refresh every 30 seconds
-    this.refreshTimer = setInterval(() => {
-      controller.refresh();
-    }, 30000);
+  resetController(controller, isExiting) {
+    if (isExiting) {
+      // Reset controller state when leaving the route
+      controller.isLoading = false;
+      controller.error = null;
+      controller.previousEventHashes = [];
+    }
   }
 
   deactivate() {
