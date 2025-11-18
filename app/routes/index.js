@@ -77,6 +77,9 @@ export default class IndexRoute extends Route {
   setupController(controller, model) {
     super.setupController(controller, model);
 
+    // Mark initial loading as complete
+    controller.isInitialLoading = false;
+
     // Set up auto-refresh every 30 seconds
     this.refreshTimer = setInterval(() => {
       controller.refresh();

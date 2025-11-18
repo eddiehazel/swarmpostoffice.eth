@@ -5,6 +5,7 @@ import { parseEvent } from '../utils/price-utils';
 
 export default class IndexController extends Controller {
   @tracked isLoading = false;
+  @tracked isInitialLoading = true;
   @tracked error = null;
   @tracked previousEventHashes = [];
 
