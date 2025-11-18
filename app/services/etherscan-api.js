@@ -183,4 +183,94 @@ export default class EtherscanApiService extends Service {
 
     return historical;
   }
+
+  /**
+   * Get daily price data for the last 2 weeks (14 days)
+   */
+  async getDailyChartData() {
+    try {
+      const currentBlock = await this.getCurrentBlock();
+      const dataPoints = [];
+      const numberOfDays = 14;
+
+      // Fetch price for each of the last 14 days
+      for (let i = 0; i < numberOfDays; i++) {
+        const targetBlock = currentBlock - BLOCKS_PER_DAY * i;
+        const priceData = await this.getHistoricalPrice(targetBlock);
+
+        if (priceData) {
+          dataPoints.unshift({
+            date: new Date(priceData.timestamp * 1000),
+            price: priceData.price,
+            blockNumber: priceData.blockNumber,
+          });
+        }
+      }
+
+      return dataPoints;
+    } catch (error) {
+      console.error('Error fetching daily chart data:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get weekly price data for the last 3 months (~13 weeks)
+   */
+  async getWeeklyChartData() {
+    try {
+      const currentBlock = await this.getCurrentBlock();
+      const dataPoints = [];
+      const numberOfWeeks = 13;
+
+      // Fetch price for each of the last 13 weeks
+      for (let i = 0; i < numberOfWeeks; i++) {
+        const targetBlock = currentBlock - BLOCKS_PER_WEEK * i;
+        const priceData = await this.getHistoricalPrice(targetBlock);
+
+        if (priceData) {
+          dataPoints.unshift({
+            date: new Date(priceData.timestamp * 1000),
+            price: priceData.price,
+            blockNumber: priceData.blockNumber,
+          });
+        }
+      }
+
+      return dataPoints;
+    } catch (error) {
+      console.error('Error fetching weekly chart data:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get monthly price data for the last year (12 months)
+   */
+  async getMonthlyChartData() {
+    try {
+      const currentBlock = await this.getCurrentBlock();
+      const dataPoints = [];
+      const numberOfMonths = 12;
+
+      // Fetch price for each of the last 12 months
+      for (let i = 0; i < numberOfMonths; i++) {
+        const targetBlock = currentBlock - BLOCKS_PER_MONTH * i;
+        const priceData = await this.getHistoricalPrice(targetBlock);
+
+        if (priceData) {
+          dataPoints.unshift({
+            date: new Date(priceData.timestamp * 1000),
+            price: priceData.price,
+            blockNumber: priceData.blockNumber,
+          });
+        }
+      }
+
+      return dataPoints;
+    } catch (error) {
+      console.error('Error fetching monthly chart data:', error);
+      return [];
+    }
+  }
 }
