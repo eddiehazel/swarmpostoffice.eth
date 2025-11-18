@@ -8,6 +8,13 @@ export default class IndexController extends Controller {
   @tracked isInitialLoading = true;
   @tracked error = null;
   @tracked previousEventHashes = [];
+  @tracked model = {
+    events: [],
+    stats: { totalEvents: 0, latestPrice: 0, avgChange: 0 },
+    historical: null,
+    currentBlock: null,
+    newEventHashes: [],
+  };
 
   get hasEvents() {
     return this.model?.events?.length > 0;

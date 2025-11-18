@@ -24,3 +24,5 @@
 
 # broccoli-debug
 /DEBUG/
+playwright-report/
+test-results/
