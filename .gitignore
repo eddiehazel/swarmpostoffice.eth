@@ -24,3 +24,9 @@
 
 # broccoli-debug
 /DEBUG/
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+test-results.json
