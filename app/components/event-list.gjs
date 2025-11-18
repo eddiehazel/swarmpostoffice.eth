@@ -6,7 +6,7 @@ import includes from '../helpers/includes.js';
 <template>
   <div class="events-container">
     <div class="events-header">
-      <h2 class="events-title">Last 50 Price Updates</h2>
+      <h2 class="events-title">📨 Last 50 Price Updates</h2>
       {{#if @isLoading}}
         <div class="refresh-info">Loading...</div>
       {{else}}
@@ -17,7 +17,7 @@ import includes from '../helpers/includes.js';
       {{#if @isLoading}}
         <div class="loading">
           <div class="spinner"></div>
-          Loading price events...
+          📭 Loading price events...
         </div>
       {{else if @error}}
         <div class="error">

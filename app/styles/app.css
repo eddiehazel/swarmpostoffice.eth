@@ -19,11 +19,12 @@ body {
 }
 
 .header {
-  background: white;
+  background: linear-gradient(135deg, #fff 0%, #f8f9ff 100%);
   border-radius: 15px;
   padding: 30px;
   margin-bottom: 30px;
-  box-shadow: 0 10px 40px rgb(0 0 0 / 10%);
+  box-shadow: 0 10px 40px rgb(102 126 234 / 15%);
+  border: 1px solid rgb(102 126 234 / 10%);
 }
 
 h1 {
@@ -46,10 +47,11 @@ h1 {
 }
 
 .stat-card {
-  background: white;
+  background: linear-gradient(135deg, #fff 0%, #fafbff 100%);
   border-radius: 15px;
   padding: 20px;
-  box-shadow: 0 5px 20px rgb(0 0 0 / 10%);
+  box-shadow: 0 5px 20px rgb(102 126 234 / 12%);
+  border: 1px solid rgb(102 126 234 / 8%);
   transition:
     transform 0.2s,
     box-shadow 0.2s;
@@ -57,7 +59,7 @@ h1 {
 
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgb(0 0 0 / 15%);
+  box-shadow: 0 8px 25px rgb(102 126 234 / 20%);
 }
 
 .stat-label {
