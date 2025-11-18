@@ -46,6 +46,10 @@ jobs:
         with:
           node-version: 18
           cache: npm
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
       - name: Install Dependencies
         run: npm ci
       - name: Run Tests
@@ -56,6 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [lint, test]
+    if: always()
 
     steps:
       - uses: actions/checkout@v4

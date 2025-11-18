@@ -24,11 +24,12 @@
         }
 
         .header {
-            background: white;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.1);
         }
 
         h1 {
@@ -51,10 +52,17 @@
         }
 
         .stat-card {
-            background: white;
+            background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
             border-radius: 15px;
             padding: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.12);
+            border: 1px solid rgba(102, 126, 234, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
         }
 
         .stat-label {
@@ -240,24 +248,24 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔔 Price Update Events</h1>
+            <h1>📬 Price Update Events Dashboard</h1>
             <div class="contract-info">
-                Contract: <strong>0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b</strong><br>
-                Network: <strong>Gnosis Chain</strong>
+                📮 Contract: <strong>0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b</strong><br>
+                🌐 Network: <strong>Gnosis Chain</strong>
             </div>
         </div>
 
         <div class="stats">
             <div class="stat-card">
-                <div class="stat-label">Total Events</div>
+                <div class="stat-label">📦 Total Events</div>
                 <div class="stat-value" id="totalEvents">-</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Latest Price</div>
+                <div class="stat-label">💰 Latest Price</div>
                 <div class="stat-value" id="latestPrice">-</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Avg Change</div>
+                <div class="stat-label">📊 Avg Change</div>
                 <div class="stat-value" id="avgChange">-</div>
             </div>
         </div>
@@ -268,12 +276,12 @@
 
         <div class="events-container">
             <div class="events-header">
-                <h2 class="events-title">Last 50 Price Updates</h2>
+                <h2 class="events-title">📨 Last 50 Price Updates</h2>
             </div>
             <div id="eventsContent">
                 <div class="loading">
                     <div class="spinner"></div>
-                    Loading price events...
+                    📭 Loading price events...
                 </div>
             </div>
         </div>

@@ -8,7 +8,7 @@ module('Acceptance | index', function (hooks) {
   test('visiting /', async function (assert) {
     await visit('/?key=test-key');
     assert.strictEqual(currentURL(), '/?key=test-key');
-    assert.dom('h1').hasText('🔔 Price Update Events');
+    assert.dom('h1').hasText('📬 Price Update Events Dashboard');
   });
 
   test('it displays contract information', async function (assert) {

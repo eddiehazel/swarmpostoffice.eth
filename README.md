@@ -1,4 +1,4 @@
-# Price Update Events Dashboard
+# 📬 Price Update Events Dashboard
 
 A beautiful, modern Ember.js dashboard for monitoring PriceUpdate events from a Gnosis Chain smart contract. Built with Ember.js 6.8.0 (Octane edition) using the latest best practices and tools.
 
