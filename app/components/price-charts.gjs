@@ -42,7 +42,7 @@ export default class PriceChartsComponent extends Component {
   weeklyChart = null;
   monthlyChart = null;
 
-  setupChart = modifier((element, [chartType]) => {
+  setupChart = modifier(() => {
     this.loadChartData();
 
     return () => {
