@@ -166,7 +166,9 @@ export default class EtherscanApiService extends Service {
    */
   async getHistoricalPrices(currentBlock) {
     const periods = {
+      day: currentBlock - BLOCKS_PER_DAY,
       week: currentBlock - BLOCKS_PER_WEEK,
+      twoWeeks: currentBlock - BLOCKS_PER_WEEK * 2,
       month: currentBlock - BLOCKS_PER_MONTH,
       threeMonths: currentBlock - BLOCKS_PER_MONTH * 3,
       sixMonths: currentBlock - BLOCKS_PER_MONTH * 6,
