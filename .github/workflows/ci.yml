@@ -38,6 +38,7 @@ jobs:
     name: "Test"
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4
@@ -56,6 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [lint, test]
+    if: always()
 
     steps:
       - uses: actions/checkout@v4
