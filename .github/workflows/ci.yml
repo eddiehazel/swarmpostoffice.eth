@@ -11,6 +11,11 @@ concurrency:
   group: ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+  pull-requests: write
+  pages: write
+
 jobs:
   lint:
     name: "Lint"
