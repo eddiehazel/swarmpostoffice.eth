@@ -24,11 +24,19 @@ import formatPrice from '../helpers/format-price';
       />
       <StatCard
         @label="💰 Latest Price"
-        @value={{if @model.stats.latestPrice (concat (formatPrice @model.stats.latestPrice) " PLUR") "-"}}
+        @value={{if
+          @model.stats.latestPrice
+          (concat (formatPrice @model.stats.latestPrice) " PLUR")
+          "-"
+        }}
       />
       <StatCard
         @label="📊 Avg Change"
-        @value={{if @model.stats.avgChange (concat @model.stats.avgChange "%") "-"}}
+        @value={{if
+          @model.stats.avgChange
+          (concat @model.stats.avgChange "%")
+          "-"
+        }}
       />
     </div>
 
