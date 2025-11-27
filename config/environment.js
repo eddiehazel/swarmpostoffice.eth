@@ -5,7 +5,7 @@ module.exports = function (environment) {
     modulePrefix: 'price-dashboard',
     environment,
     rootURL: '/',
-    locationType: 'auto',
+    locationType: 'hash',
     EmberENV: {
       EXTEND_PROTOTYPES: false,
       FEATURES: {

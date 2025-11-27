@@ -2,6 +2,8 @@ import StatCard from '../components/stat-card.gjs';
 import HistoricalComparison from '../components/historical-comparison.gjs';
 import EventList from '../components/event-list.gjs';
 import or from '../helpers/or';
+import concat from '../helpers/concat';
+import formatPrice from '../helpers/format-price';
 
 <template>
   <div class="container">
@@ -22,11 +24,19 @@ import or from '../helpers/or';
       />
       <StatCard
         @label="💰 Latest Price"
-        @value={{this.controller.latestPriceDisplay}}
+        @value={{if
+          @model.stats.latestPrice
+          (concat (formatPrice @model.stats.latestPrice) " PLUR")
+          "-"
+        }}
       />
       <StatCard
         @label="📊 Avg Change"
-        @value={{this.controller.avgChangeDisplay}}
+        @value={{if
+          @model.stats.avgChange
+          (concat @model.stats.avgChange "%")
+          "-"
+        }}
       />
     </div>
 
@@ -39,9 +49,9 @@ import or from '../helpers/or';
 
     <EventList
       @events={{@model.events}}
-      @isLoading={{this.controller.isLoading}}
-      @error={{or @model.error this.controller.error}}
-      @newEventHashes={{this.controller.newEventHashes}}
+      @isLoading={{@model.isLoading}}
+      @error={{@model.error}}
+      @newEventHashes={{@model.newEventHashes}}
     />
   </div>
 </template>
