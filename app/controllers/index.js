@@ -4,8 +4,6 @@ import { action } from '@ember/object';
 import { parseEvent } from '../utils/price-utils';
 
 export default class IndexController extends Controller {
-  @tracked isLoading = false;
-  @tracked error = null;
   @tracked previousEventHashes = [];
 
   get hasEvents() {
@@ -38,8 +36,7 @@ export default class IndexController extends Controller {
     const etherscanApi = this.owner.lookup('service:etherscan-api');
 
     try {
-      this.isLoading = true;
-      this.error = null;
+      this.model = { ...this.model, isLoading: true, error: null };
 
       // Store previous hashes for animation detection
       if (this.model?.events) {
@@ -56,6 +53,7 @@ export default class IndexController extends Controller {
           historical: null,
           currentBlock: null,
           newEventHashes: [],
+          isLoading: false,
         };
         return;
       }
@@ -99,12 +97,11 @@ export default class IndexController extends Controller {
         historical,
         currentBlock,
         newEventHashes: this.newEventHashes,
+        isLoading: false,
       };
     } catch (error) {
-      this.error = error.message;
+      this.model = { ...this.model, isLoading: false, error: error.message };
       console.error('Error refreshing data:', error);
-    } finally {
-      this.isLoading = false;
     }
   }
 }

@@ -18,6 +18,7 @@ export default class IndexRoute extends Route {
           historical: null,
           currentBlock: null,
           newEventHashes: [],
+          isLoading: false,
         };
       }
 
@@ -60,15 +61,16 @@ export default class IndexRoute extends Route {
         historical,
         currentBlock,
         newEventHashes: [],
+        isLoading: false,
       };
     } catch (error) {
-      this.error = error.message;
       return {
         events: [],
         stats: { totalEvents: 0, latestPrice: 0, avgChange: 0 },
         historical: null,
         currentBlock: null,
         newEventHashes: [],
+        isLoading: false,
         error: error.message,
       };
     }
