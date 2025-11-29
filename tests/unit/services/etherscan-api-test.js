@@ -48,4 +48,34 @@ module('Unit | Service | etherscan-api', function (hooks) {
 
     service.apiKey = null;
   });
+
+  test('getDailyChartData returns empty array on error', async function (assert) {
+    const service = this.owner.lookup('service:etherscan-api');
+    // Set API key to null to trigger error
+    service.apiKey = null;
+
+    const result = await service.getDailyChartData();
+    assert.ok(Array.isArray(result), 'Result should be an array');
+    assert.strictEqual(result.length, 0, 'Result should be empty on error');
+  });
+
+  test('getWeeklyChartData returns empty array on error', async function (assert) {
+    const service = this.owner.lookup('service:etherscan-api');
+    // Set API key to null to trigger error
+    service.apiKey = null;
+
+    const result = await service.getWeeklyChartData();
+    assert.ok(Array.isArray(result), 'Result should be an array');
+    assert.strictEqual(result.length, 0, 'Result should be empty on error');
+  });
+
+  test('getMonthlyChartData returns empty array on error', async function (assert) {
+    const service = this.owner.lookup('service:etherscan-api');
+    // Set API key to null to trigger error
+    service.apiKey = null;
+
+    const result = await service.getMonthlyChartData();
+    assert.ok(Array.isArray(result), 'Result should be an array');
+    assert.strictEqual(result.length, 0, 'Result should be empty on error');
+  });
 });
