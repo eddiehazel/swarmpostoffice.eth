@@ -1,5 +1,6 @@
 import StatCard from '../components/stat-card.gjs';
 import HistoricalComparison from '../components/historical-comparison.gjs';
+import PriceChart from '../components/price-chart.gjs';
 import EventList from '../components/event-list.gjs';
 import or from '../helpers/or';
 import concat from '../helpers/concat';
@@ -46,6 +47,8 @@ import formatPrice from '../helpers/format-price';
         @latestPrice={{@model.stats.latestPrice}}
       />
     {{/if}}
+
+    <PriceChart @data={{@model.dailyPrices}} />
 
     <EventList
       @events={{@model.events}}

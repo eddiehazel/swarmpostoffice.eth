@@ -16,6 +16,7 @@ export default class IndexRoute extends Route {
           events: [],
           stats: { totalEvents: 0, latestPrice: 0, avgChange: 0 },
           historical: null,
+          dailyPrices: [],
           currentBlock: null,
           newEventHashes: [],
           isLoading: false,
@@ -51,6 +52,10 @@ export default class IndexRoute extends Route {
       // Get historical data
       const historical = await etherscanApi.getHistoricalPrices(currentBlock);
 
+      // Get daily prices for the last 30 days
+      const dailyPrices =
+        await etherscanApi.getDailyPricesForMonth(currentBlock);
+
       return {
         events: displayEvents,
         stats: {
@@ -59,6 +64,7 @@ export default class IndexRoute extends Route {
           avgChange,
         },
         historical,
+        dailyPrices,
         currentBlock,
         newEventHashes: [],
         isLoading: false,
@@ -68,6 +74,7 @@ export default class IndexRoute extends Route {
         events: [],
         stats: { totalEvents: 0, latestPrice: 0, avgChange: 0 },
         historical: null,
+        dailyPrices: [],
         currentBlock: null,
         newEventHashes: [],
         isLoading: false,

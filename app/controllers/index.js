@@ -1,6 +1,7 @@
 import Controller from '@ember/controller';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
+import { getOwner } from '@ember/owner';
 import { parseEvent } from '../utils/price-utils';
 
 export default class IndexController extends Controller {
@@ -33,7 +34,8 @@ export default class IndexController extends Controller {
 
   @action
   async refresh() {
-    const etherscanApi = this.owner.lookup('service:etherscan-api');
+    const owner = getOwner(this);
+    const etherscanApi = owner.lookup('service:etherscan-api');
 
     try {
       this.model = { ...this.model, isLoading: true, error: null };
@@ -87,6 +89,10 @@ export default class IndexController extends Controller {
       // Get historical data
       const historical = await etherscanApi.getHistoricalPrices(currentBlock);
 
+      // Get daily prices for the last 30 days
+      const dailyPrices =
+        await etherscanApi.getDailyPricesForMonth(currentBlock);
+
       this.model = {
         events: displayEvents,
         stats: {
@@ -95,6 +101,7 @@ export default class IndexController extends Controller {
           avgChange,
         },
         historical,
+        dailyPrices,
         currentBlock,
         newEventHashes: this.newEventHashes,
         isLoading: false,

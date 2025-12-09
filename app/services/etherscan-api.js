@@ -183,4 +183,27 @@ export default class EtherscanApiService extends Service {
 
     return historical;
   }
+
+  /**
+   * Get daily prices for the last 30 days
+   */
+  async getDailyPricesForMonth(currentBlock) {
+    const dailyPrices = [];
+
+    // Fetch price for each of the last 30 days
+    for (let day = 0; day < 30; day++) {
+      const targetBlock = currentBlock - BLOCKS_PER_DAY * day;
+      const priceData = await this.getHistoricalPrice(targetBlock);
+
+      if (priceData) {
+        dailyPrices.push({
+          ...priceData,
+          dayIndex: day, // 0 = today, 1 = yesterday, etc.
+        });
+      }
+    }
+
+    // Return in chronological order (oldest first)
+    return dailyPrices.reverse();
+  }
 }
