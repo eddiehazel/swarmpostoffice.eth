@@ -23,13 +23,39 @@ export default class PriceChart extends Component {
       }));
     }
 
-    return this.args.data.map((item) => ({
-      date: new Date(item.timestamp * 1000),
-      price: item.price,
-      timestamp: item.timestamp,
-      blockNumber: item.blockNumber,
-      txHash: item.txHash,
-    }));
+    const mapped = this.args.data
+      .map((item) => ({
+        date: new Date(item.timestamp * 1000),
+        pricePLUR: typeof item.price === 'number' ? item.price / 1e18 : 0, // Convert to PLUR
+        priceWei: item.price,
+        timestamp: item.timestamp,
+        blockNumber: item.blockNumber,
+        txHash: item.txHash,
+        interpolated: item.interpolated,
+      }))
+      .filter((d) => d.pricePLUR > 0); // Remove zero prices
+
+    console.log('[Chart] chartData:', {
+      total: mapped.length,
+      rawDataCount: this.args.data.length,
+      first: mapped[0]
+        ? {
+            date: mapped[0].date.toISOString(),
+            block: mapped[0].blockNumber,
+            pricePLUR: mapped[0].pricePLUR.toFixed(6),
+          }
+        : null,
+      last: mapped[mapped.length - 1]
+        ? {
+            date: mapped[mapped.length - 1].date.toISOString(),
+            block: mapped[mapped.length - 1].blockNumber,
+            pricePLUR: mapped[mapped.length - 1].pricePLUR.toFixed(6),
+          }
+        : null,
+      interpolated: mapped.filter((d) => d.interpolated).length,
+    });
+
+    return mapped;
   }
 
   @action
@@ -116,32 +142,44 @@ export default class PriceChart extends Component {
       .attr('stop-color', '#764ba2')
       .attr('stop-opacity', 0.05);
 
-    // Scales
+    // X-axis: Block numbers
     const x = d3
-      .scaleTime()
-      .domain(d3.extent(data, (d) => d.date))
+      .scaleLinear()
+      .domain(d3.extent(data, (d) => d.blockNumber))
       .range([0, width]);
 
-    const yExtent = d3.extent(data, (d) => d.price);
-    const yPadding = (yExtent[1] - yExtent[0]) * 0.1 || 1;
-    const y = d3
-      .scaleLinear()
-      .domain([Math.max(0, yExtent[0] - yPadding), yExtent[1] + yPadding])
-      .range([height, 0]);
+    // Y-axis: Price in PLUR (already converted)
+    const yExtent = d3.extent(data, (d) => d.pricePLUR);
+    const priceRange = yExtent[1] - yExtent[0];
+    // Use 10% padding, but ensure minimum padding is 5% of max price
+    const yPadding = Math.max(priceRange * 0.1, yExtent[1] * 0.05);
+
+    const yDomain = [Math.max(0, yExtent[0] - yPadding), yExtent[1] + yPadding];
+
+    console.log('[Chart] Axis setup:', {
+      dataPoints: data.length,
+      xExtent: d3.extent(data, (d) => d.blockNumber),
+      yExtent: { min: yExtent[0], max: yExtent[1] },
+      priceRange,
+      padding: yPadding,
+      yDomain,
+    });
+
+    const y = d3.scaleLinear().domain(yDomain).range([height, 0]);
 
     // Line generator with beautiful curve
     const line = d3
       .line()
-      .x((d) => x(d.date))
-      .y((d) => y(d.price))
+      .x((d) => x(d.blockNumber))
+      .y((d) => y(d.pricePLUR))
       .curve(d3.curveCardinal.tension(0.5)); // Beautiful rounded spline
 
     // Area generator for fill
     const area = d3
       .area()
-      .x((d) => x(d.date))
+      .x((d) => x(d.blockNumber))
       .y0(height)
-      .y1((d) => y(d.price))
+      .y1((d) => y(d.pricePLUR))
       .curve(d3.curveCardinal.tension(0.5));
 
     // Add area fill
@@ -180,8 +218,11 @@ export default class PriceChart extends Component {
       .ease(d3.easeCubicOut)
       .attr('d', line);
 
-    // Add X axis
-    const xAxis = d3.axisBottom(x).ticks(6).tickFormat(d3.timeFormat('%b %d'));
+    // Add X axis with block numbers
+    const xAxis = d3
+      .axisBottom(x)
+      .ticks(6)
+      .tickFormat((d) => d.toLocaleString());
 
     svg
       .append('g')
@@ -198,11 +239,42 @@ export default class PriceChart extends Component {
 
     svg.selectAll('.x-axis path, .x-axis line').style('stroke', '#ddd');
 
-    // Add Y axis
+    // Add X axis label
+    svg
+      .append('text')
+      .attr('x', width / 2)
+      .attr('y', height + margin.bottom - 5)
+      .style('text-anchor', 'middle')
+      .style('fill', '#667eea')
+      .style('font-weight', '600')
+      .style('font-size', '14px')
+      .text('Block Number');
+
+    // Add Y axis (values already in PLUR)
+    // Calculate appropriate number of decimal places based on price magnitude
+    const maxPrice = yExtent[1];
+    const minPrice = yExtent[0];
+
+    // Determine decimals based on price range
+    let decimals;
+    if (priceRange < 0.001) decimals = 8;
+    else if (priceRange < 0.1) decimals = 6;
+    else if (priceRange < 10) decimals = 4;
+    else if (priceRange < 100) decimals = 2;
+    else decimals = 0;
+
+    console.log('[Chart] Y-axis formatting:', {
+      minPrice,
+      maxPrice,
+      priceRange,
+      decimals,
+      sampleTicks: y.ticks(6).map((d) => d.toFixed(8)),
+    });
+
     const yAxis = d3
       .axisLeft(y)
       .ticks(6)
-      .tickFormat((d) => `${(d / 1e18).toFixed(2)}`);
+      .tickFormat((d) => d.toFixed(decimals));
 
     svg
       .append('g')
@@ -261,8 +333,8 @@ export default class PriceChart extends Component {
         .style('stroke-dasharray', '3,3')
         .style('opacity', 0.5);
 
-      // Bisector for finding nearest data point
-      const bisect = d3.bisector((d) => d.date).left;
+      // Bisector for finding nearest data point by block number
+      const bisect = d3.bisector((d) => d.blockNumber).left;
 
       overlay
         .on('mouseover', () => {
@@ -281,14 +353,17 @@ export default class PriceChart extends Component {
           const d1 = data[i];
           if (!d0 || !d1) return;
 
-          const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+          const d = x0 - d0.blockNumber > d1.blockNumber - x0 ? d1 : d0;
 
-          focus.attr('transform', `translate(${x(d.date)},${y(d.price)})`);
+          focus.attr(
+            'transform',
+            `translate(${x(d.blockNumber)},${y(d.pricePLUR)})`
+          );
 
           focus
             .select('.vertical-line')
             .attr('y1', 0)
-            .attr('y2', height - y(d.price));
+            .attr('y2', height - y(d.pricePLUR));
 
           // Position tooltip
           const tooltipX = event.pageX;
@@ -297,8 +372,8 @@ export default class PriceChart extends Component {
           tooltip.style('left', `${tooltipX}px`).style('top', `${tooltipY}px`)
             .html(`
               <div class="tooltip-date">${d3.timeFormat('%B %d, %Y')(d.date)}</div>
-              <div class="tooltip-price">${(d.price / 1e18).toFixed(6)} PLUR</div>
-              ${d.blockNumber ? `<div class="tooltip-block">Block: ${d.blockNumber.toLocaleString()}</div>` : ''}
+              <div class="tooltip-price">${d.pricePLUR.toFixed(6)} PLUR</div>
+              <div class="tooltip-block">Block: ${d.blockNumber.toLocaleString()}</div>
             `);
         });
 
@@ -309,7 +384,7 @@ export default class PriceChart extends Component {
         .enter()
         .append('circle')
         .attr('class', 'dot')
-        .attr('cx', (d) => x(d.date))
+        .attr('cx', (d) => x(d.blockNumber))
         .attr('cy', height)
         .attr('r', 0)
         .style('fill', '#764ba2')
@@ -319,7 +394,7 @@ export default class PriceChart extends Component {
         .transition()
         .delay((d, i) => i * 20)
         .duration(500)
-        .attr('cy', (d) => y(d.price))
+        .attr('cy', (d) => y(d.pricePLUR))
         .attr('r', 4);
     }
   }
