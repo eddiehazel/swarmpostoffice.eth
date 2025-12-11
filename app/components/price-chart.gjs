@@ -274,15 +274,12 @@ export default class PriceChart extends Component {
     const yAxis = d3
       .axisLeft(y)
       .ticks(6)
-      .tickFormat((d) => d.toFixed(decimals));
+      .tickFormat(() => ''); // Remove tick labels
 
     svg
       .append('g')
       .attr('class', 'y-axis')
-      .call(yAxis)
-      .selectAll('text')
-      .style('fill', '#888')
-      .style('font-size', '12px');
+      .call(yAxis);
 
     svg.selectAll('.y-axis path, .y-axis line').style('stroke', '#ddd');
 

@@ -54,50 +54,50 @@ export default class StorageCostGrid extends Component {
 
   calculateBzzPerGBPerMonth(pricePerChunk, depth) {
     // Calculation breakdown:
-    // 1. pricePerChunk is in PLUR
-    // 2. Get the size in GB for this depth
-    // 3. Calculate chunks for this depth
-    // 4. Total cost for this depth = chunks * pricePerChunk (in BZZ)
-    // 5. Cost per GB = total cost / size in GB
-    // 6. For a month, we assume this is a monthly storage cost
-
-    // ; (151563651357081600/1e16)/2.6
-    // 	5.8293712060416
-    // ; 3.536*4
-    // 	14.144
-    // ; (3.536*4)/2.6
-    // 	5.44
+    // 1. pricePerChunk is in PLUR (raw value like 151563651357081600)
+    // 2. Convert to BZZ by dividing by 1e16
+    // 3. Get the size in GB for this depth
+    // 4. Calculate chunks for this depth
+    // 5. Total cost for this depth = chunks * pricePerChunk (in BZZ)
+    // 6. Cost per GB = total cost / size in GB
+    // 7. Scale up to monthly cost (assuming 5 second blocks)
 
     const BLOCK_TIME_SECONDS = 5;
 
     const sizeInGB = this.getSizeInGB(depth);
-    console.log('sizeInGB', sizeInGB);
-    //2.2
+    console.log('[StorageCost] depth:', depth, 'sizeInGB:', sizeInGB);
 
     if (sizeInGB === 0) return 0;
 
     const chunks = this.getChunksForDepth(depth);
-    const actualSizeInGB = (chunks * 1024 * 4) / 1024 / 1000 / 1000;
-    console.log('actualSizeInGB', actualSizeInGB);
-    // 134.217728
+    console.log(
+      '[StorageCost] chunks:',
+      chunks,
+      'pricePerChunk (PLUR):',
+      pricePerChunk
+    );
 
-    // Total cost in BZZ to store this amount as will be calculated by the storage incentives contract
-    // based on the total number of chunks and current price
-    // then multiplied up to get price for one month
+    // Convert price from PLUR to BZZ
+    const pricePerChunkBZZ = pricePerChunk / 1e16;
+    console.log('[StorageCost] pricePerChunkBZZ:', pricePerChunkBZZ);
 
-    console.log(pricePerChunk, chunks);
-    const totalCost = pricePerChunk * chunks;
+    // Total cost in BZZ to store this amount for one block
+    const totalCostPerBlock = pricePerChunkBZZ * chunks;
+    console.log('[StorageCost] totalCostPerBlock:', totalCostPerBlock);
 
-    const costPerMonth = ((totalCost * 60) / BLOCK_TIME_SECONDS) * 60 * 24 * 30;
+    // Calculate blocks per month (5 second blocks)
+    const blocksPerMonth = (60 / BLOCK_TIME_SECONDS) * 60 * 24 * 30;
+    console.log('[StorageCost] blocksPerMonth:', blocksPerMonth);
 
-    // Normalise cost per GB for this depth
-    const costPerGBMOnth = costPerMonth / sizeInGB;
+    // Total cost for one month
+    const costPerMonth = totalCostPerBlock * blocksPerMonth;
+    console.log('[StorageCost] costPerMonth:', costPerMonth);
 
-    // console.log("depth", depth, "totalCost", totalCost, "sizeInGB", sizeInGB)
+    // Normalize cost per GB for this depth
+    const costPerGBMonth = costPerMonth / sizeInGB;
+    console.log('[StorageCost] costPerGBMonth:', costPerGBMonth);
 
-    // console.log("pricePerChunk, totalCost, costPerGB", pricePerChunk, totalCost, costPerGBMOnth)
-
-    return costPerGBMOnth / 1e16;
+    return costPerGBMonth;
   }
 
   get storageOptions() {
@@ -163,7 +163,8 @@ export default class StorageCostGrid extends Component {
       <div class="storage-grid">
         {{#each this.storageOptions as |option|}}
           <div class="storage-item">
-            <div class="storage-value">{{option.value}}</div>
+            <div class="storage-value"><span class="bzz-prefix">BZZ</span>
+              {{option.value}}</div>
             <div class="storage-label">{{option.label}} ({{option.size}})</div>
           </div>
         {{/each}}

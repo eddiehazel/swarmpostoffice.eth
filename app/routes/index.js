@@ -85,7 +85,7 @@ export default class IndexRoute extends Route {
           const change = today.price - yesterday.price;
           const changePercent = (change / yesterday.price) * 100;
           dayChange = changePercent.toFixed(2);
-          const changePLUR = change / 1e18;
+          const changePLUR = change / 1e16;
           const sign = changePLUR >= 0 ? '+' : '';
           // Use more decimals to show meaningful values
           const absChange = Math.abs(changePLUR);
