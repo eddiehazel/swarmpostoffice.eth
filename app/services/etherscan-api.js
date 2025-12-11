@@ -19,8 +19,11 @@ export default class EtherscanApiService extends Service {
   // Key: block number, Value: { data, timestamp }
   priceCache = new Map();
 
-  // Cache TTL: 5 minutes (historical data doesn't change)
-  CACHE_TTL = 5 * 60 * 1000;
+  // Cache TTL: 24 hours for historical data (doesn't change)
+  CACHE_TTL = 24 * 60 * 60 * 1000;
+
+  // Cache TTL for current/recent data: 1 minute (frequently updates)
+  RECENT_CACHE_TTL = 60 * 1000;
 
   // localStorage key for persisting cache
   CACHE_STORAGE_KEY = 'etherscan-price-cache';
@@ -105,17 +108,21 @@ export default class EtherscanApiService extends Service {
   /**
    * Check if cached data is still valid
    */
-  isCacheValid(cacheEntry) {
+  isCacheValid(cacheEntry, isRecent = false) {
     if (!cacheEntry) return false;
-    return Date.now() - cacheEntry.timestamp < this.CACHE_TTL;
+    const ttl = isRecent ? this.RECENT_CACHE_TTL : this.CACHE_TTL;
+    return Date.now() - cacheEntry.timestamp < ttl;
   }
 
   /**
    * Get cached price data for a block
    */
-  getCachedPrice(blockNumber) {
+  getCachedPrice(blockNumber, currentBlock = null) {
     const cacheEntry = this.priceCache.get(blockNumber);
-    if (this.isCacheValid(cacheEntry)) {
+    // Consider data recent if it's within the last day of blocks
+    const isRecent =
+      currentBlock !== null && blockNumber > currentBlock - BLOCKS_PER_DAY;
+    if (this.isCacheValid(cacheEntry, isRecent)) {
       // Return the cached data even if it's null
       // We use undefined to indicate cache miss, null means "no data found"
       return cacheEntry.data === null ? null : cacheEntry.data;

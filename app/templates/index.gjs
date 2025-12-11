@@ -5,6 +5,7 @@ import PriceChart from '../components/price-chart.gjs';
 import EventList from '../components/event-list.gjs';
 import concat from '../helpers/concat';
 import formatPrice from '../helpers/format-price';
+import { fn } from '@ember/helper';
 
 <template>
   <div class="container">
@@ -53,8 +54,12 @@ import formatPrice from '../helpers/format-price';
     <EventList
       @events={{@model.events}}
       @isLoading={{@model.isLoading}}
+      @isLoadingMore={{@model.controller.isLoadingMore}}
       @error={{@model.error}}
       @newEventHashes={{@model.newEventHashes}}
+      @hasMoreEvents={{@model.hasMoreEvents}}
+      @totalEventsLoaded={{@model.totalEventsLoaded}}
+      @onLoadMore={{@model.loadMoreEventsAction}}
     />
   </div>
 </template>

@@ -6,9 +6,18 @@ import { parseEvent } from '../utils/price-utils';
 
 export default class IndexController extends Controller {
   @tracked previousEventHashes = [];
+  @tracked isLoadingMore = false;
 
   get hasEvents() {
     return this.model?.events?.length > 0;
+  }
+
+  get loadMoreEventsAction() {
+    console.log('[Controller] Creating loadMoreEventsAction');
+    return () => {
+      console.log('[Controller] loadMoreEventsAction called');
+      return this.loadMoreEvents();
+    };
   }
 
   get newEventHashes() {
@@ -45,8 +54,10 @@ export default class IndexController extends Controller {
         this.previousEventHashes = this.model.events.map((e) => e.txHash);
       }
 
-      // Fetch events
-      const { events, currentBlock } = await etherscanApi.fetchPriceEvents(50);
+      // Fetch only currently loaded number of events (for refresh)
+      const countToFetch = this.model.totalEventsLoaded || 10;
+      const { events, currentBlock } =
+        await etherscanApi.fetchPriceEvents(countToFetch);
 
       if (!events || events.length === 0) {
         this.model = {
@@ -159,6 +170,8 @@ export default class IndexController extends Controller {
         currentBlock,
         newEventHashes: this.newEventHashes,
         isLoading: false,
+        hasMoreEvents: this.model.hasMoreEvents,
+        totalEventsLoaded: displayEvents.length,
       };
 
       console.log('[Controller] Setting model.stats:', model.stats);
@@ -167,6 +180,70 @@ export default class IndexController extends Controller {
     } catch (error) {
       this.model = { ...this.model, isLoading: false, error: error.message };
       console.error('Error refreshing data:', error);
+    }
+  }
+
+  @action
+  async loadMoreEvents() {
+    const owner = getOwner(this);
+    const etherscanApi = owner.lookup('service:etherscan-api');
+
+    try {
+      this.isLoadingMore = true;
+
+      // Fetch 10 more events than currently loaded
+      const newTotal = this.model.totalEventsLoaded + 10;
+      const { events, currentBlock } =
+        await etherscanApi.fetchPriceEvents(newTotal);
+
+      if (!events || events.length === 0) {
+        this.isLoadingMore = false;
+        this.model = {
+          ...this.model,
+          hasMoreEvents: false,
+        };
+        return;
+      }
+
+      // Parse events and calculate changes
+      const parsedEvents = events
+        .sort((a, b) => {
+          const hexToDecimal = (hex) => parseInt(hex, 16);
+          return hexToDecimal(a.blockNumber) - hexToDecimal(b.blockNumber);
+        })
+        .map((event, index) => {
+          const previousPrice =
+            index > 0 ? parseInt(events[index - 1].data, 16) : null;
+          return parseEvent(event, previousPrice);
+        });
+
+      // Reverse for display (newest first)
+      const displayEvents = [...parsedEvents].reverse();
+
+      // Check if we got fewer events than requested (means no more events)
+      const hasMoreEvents = events.length >= newTotal;
+
+      console.log('[Controller] Load more complete:', {
+        requested: newTotal,
+        received: events.length,
+        displayEvents: displayEvents.length,
+        hasMoreEvents,
+      });
+
+      // Update model with new events
+      this.model = {
+        ...this.model,
+        events: displayEvents,
+        totalEventsLoaded: displayEvents.length,
+        hasMoreEvents,
+        loadMoreEventsAction: this.loadMoreEventsAction,
+        controller: this,
+      };
+
+      this.isLoadingMore = false;
+    } catch (error) {
+      this.isLoadingMore = false;
+      console.error('Error loading more events:', error);
     }
   }
 }

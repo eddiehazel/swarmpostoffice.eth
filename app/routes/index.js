@@ -8,8 +8,8 @@ export default class IndexRoute extends Route {
     const etherscanApi = owner.lookup('service:etherscan-api');
 
     try {
-      // Fetch events
-      const { events, currentBlock } = await etherscanApi.fetchPriceEvents(50);
+      // Fetch only 10 events initially
+      const { events, currentBlock } = await etherscanApi.fetchPriceEvents(10);
 
       if (!events || events.length === 0) {
         return {
@@ -122,6 +122,8 @@ export default class IndexRoute extends Route {
         currentBlock,
         newEventHashes: [],
         isLoading: false,
+        hasMoreEvents: true, // Assume there are more events
+        totalEventsLoaded: displayEvents.length,
       };
 
       console.log('[Route] Returning model.stats:', model.stats);
@@ -143,6 +145,10 @@ export default class IndexRoute extends Route {
 
   setupController(controller, model) {
     super.setupController(controller, model);
+
+    // Add the loadMoreEvents action and controller reference to the model
+    model.loadMoreEventsAction = controller.loadMoreEventsAction;
+    model.controller = controller;
 
     // Set up auto-refresh every 30 seconds
     this.refreshTimer = setInterval(() => {
