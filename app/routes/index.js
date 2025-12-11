@@ -56,12 +56,66 @@ export default class IndexRoute extends Route {
       const dailyPrices =
         await etherscanApi.getDailyPricesForMonth(currentBlock);
 
-      return {
+      // Calculate 24hr change from dailyPrices
+      let dayChange = 0;
+      let dayChangePLUR = '';
+      console.log('[Route] Calculating 24hr change:', {
+        dailyPricesLength: dailyPrices?.length,
+        hasData: dailyPrices && dailyPrices.length >= 2,
+      });
+
+      if (dailyPrices && dailyPrices.length >= 2) {
+        const today = dailyPrices[dailyPrices.length - 1];
+        const yesterday = dailyPrices[dailyPrices.length - 2];
+
+        console.log('[Route] 24hr data:', {
+          today: {
+            price: today?.price,
+            pricePLUR: today?.price ? today.price / 1e18 : 0,
+            timestamp: today?.timestamp,
+          },
+          yesterday: {
+            price: yesterday?.price,
+            pricePLUR: yesterday?.price ? yesterday.price / 1e18 : 0,
+            timestamp: yesterday?.timestamp,
+          },
+        });
+
+        if (today && yesterday && yesterday.price > 0) {
+          const change = today.price - yesterday.price;
+          const changePercent = (change / yesterday.price) * 100;
+          dayChange = changePercent.toFixed(2);
+          const changePLUR = change / 1e18;
+          const sign = changePLUR >= 0 ? '+' : '';
+          // Use more decimals to show meaningful values
+          const absChange = Math.abs(changePLUR);
+          let decimals = 2;
+          if (absChange < 0.01) decimals = 6;
+          else if (absChange < 1) decimals = 4;
+          dayChangePLUR = `${sign}${changePLUR.toFixed(decimals)}`;
+
+          console.log('[Route] 24hr change calculated:', {
+            change,
+            changePercent: dayChange,
+            changePLUR: dayChangePLUR,
+          });
+        } else {
+          console.warn('[Route] Cannot calculate 24hr change:', {
+            hasToday: !!today,
+            hasYesterday: !!yesterday,
+            yesterdayPrice: yesterday?.price,
+          });
+        }
+      }
+
+      const model = {
         events: displayEvents,
         stats: {
           totalEvents,
           latestPrice,
           avgChange,
+          dayChange,
+          dayChangePLUR,
         },
         historical,
         dailyPrices,
@@ -69,6 +123,10 @@ export default class IndexRoute extends Route {
         newEventHashes: [],
         isLoading: false,
       };
+
+      console.log('[Route] Returning model.stats:', model.stats);
+
+      return model;
     } catch (error) {
       return {
         events: [],

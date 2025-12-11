@@ -1,8 +1,8 @@
 import StatCard from '../components/stat-card.gjs';
+import StorageCostGrid from '../components/storage-cost-grid.gjs';
 import HistoricalComparison from '../components/historical-comparison.gjs';
 import PriceChart from '../components/price-chart.gjs';
 import EventList from '../components/event-list.gjs';
-import or from '../helpers/or';
 import concat from '../helpers/concat';
 import formatPrice from '../helpers/format-price';
 
@@ -19,10 +19,7 @@ import formatPrice from '../helpers/format-price';
     </div>
 
     <div class="stats">
-      <StatCard
-        @label="📦 Total Events"
-        @value={{or @model.stats.totalEvents "-"}}
-      />
+      <StorageCostGrid @latestPrice={{@model.stats.latestPrice}} />
       <StatCard
         @label="💰 Latest Price"
         @value={{if
@@ -31,14 +28,17 @@ import formatPrice from '../helpers/format-price';
           "-"
         }}
       />
-      <StatCard
-        @label="📊 Avg Change"
-        @value={{if
-          @model.stats.avgChange
-          (concat @model.stats.avgChange "%")
-          "-"
-        }}
-      />
+      <div class="stat-card">
+        <div class="stat-label">📊 24hr Change</div>
+        <div class="stat-value">{{if
+            @model.stats.dayChange
+            (concat @model.stats.dayChange "%")
+            "-"
+          }}</div>
+        {{#if @model.stats.dayChangePLUR}}
+          <div class="stat-sub-value">{{@model.stats.dayChangePLUR}} PLUR</div>
+        {{/if}}
+      </div>
     </div>
 
     {{#if @model.historical}}

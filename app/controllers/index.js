@@ -93,12 +93,66 @@ export default class IndexController extends Controller {
       const dailyPrices =
         await etherscanApi.getDailyPricesForMonth(currentBlock);
 
-      this.model = {
+      // Calculate 24hr change from dailyPrices
+      let dayChange = 0;
+      let dayChangePLUR = '';
+      console.log('[Controller] Calculating 24hr change:', {
+        dailyPricesLength: dailyPrices?.length,
+        hasData: dailyPrices && dailyPrices.length >= 2,
+      });
+
+      if (dailyPrices && dailyPrices.length >= 2) {
+        const today = dailyPrices[dailyPrices.length - 1];
+        const yesterday = dailyPrices[dailyPrices.length - 2];
+
+        console.log('[Controller] 24hr data:', {
+          today: {
+            price: today?.price,
+            pricePLUR: today?.price ? today.price / 1e18 : 0,
+            timestamp: today?.timestamp,
+          },
+          yesterday: {
+            price: yesterday?.price,
+            pricePLUR: yesterday?.price ? yesterday.price / 1e18 : 0,
+            timestamp: yesterday?.timestamp,
+          },
+        });
+
+        if (today && yesterday && yesterday.price > 0) {
+          const change = today.price - yesterday.price;
+          const changePercent = (change / yesterday.price) * 100;
+          dayChange = changePercent.toFixed(2);
+          const changePLUR = change / 1e18;
+          const sign = changePLUR >= 0 ? '+' : '';
+          // Use more decimals to show meaningful values
+          const absChange = Math.abs(changePLUR);
+          let decimals = 2;
+          if (absChange < 0.01) decimals = 6;
+          else if (absChange < 1) decimals = 4;
+          dayChangePLUR = `${sign}${changePLUR.toFixed(decimals)}`;
+
+          console.log('[Controller] 24hr change calculated:', {
+            change,
+            changePercent: dayChange,
+            changePLUR: dayChangePLUR,
+          });
+        } else {
+          console.warn('[Controller] Cannot calculate 24hr change:', {
+            hasToday: !!today,
+            hasYesterday: !!yesterday,
+            yesterdayPrice: yesterday?.price,
+          });
+        }
+      }
+
+      const model = {
         events: displayEvents,
         stats: {
           totalEvents,
           latestPrice,
           avgChange,
+          dayChange,
+          dayChangePLUR,
         },
         historical,
         dailyPrices,
@@ -106,6 +160,10 @@ export default class IndexController extends Controller {
         newEventHashes: this.newEventHashes,
         isLoading: false,
       };
+
+      console.log('[Controller] Setting model.stats:', model.stats);
+
+      this.model = model;
     } catch (error) {
       this.model = { ...this.model, isLoading: false, error: error.message };
       console.error('Error refreshing data:', error);
