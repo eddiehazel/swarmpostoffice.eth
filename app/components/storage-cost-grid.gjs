@@ -153,11 +153,6 @@ export default class StorageCostGrid extends Component {
           </div>
         {{/each}}
       </div>
-      <div class="get-bzz"><a
-          href="https://app.uniswap.org/#/swap?inputCurrency=ETH&outputCurrency=0x19062190B1925b5b6689D7073fDfC8c2976EF8Cb"
-          target="_blank"
-          rel="noopener noreferrer"
-        >Get BZZ on Uniswap</a></div>
     </div>
   </template>
 }
