@@ -5,7 +5,6 @@ import PriceChart from '../components/price-chart.gjs';
 import EventList from '../components/event-list.gjs';
 import concat from '../helpers/concat';
 import formatPrice from '../helpers/format-price';
-import { fn } from '@ember/helper';
 
 <template>
   <div class="container">

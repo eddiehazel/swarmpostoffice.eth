@@ -213,8 +213,7 @@ export default class IndexController extends Controller {
         newTotal,
       });
 
-      const { events, currentBlock } =
-        await etherscanApi.fetchPriceEvents(newTotal);
+      const { events } = await etherscanApi.fetchPriceEvents(newTotal);
 
       if (!events || events.length === 0) {
         this.isLoadingMore = false;

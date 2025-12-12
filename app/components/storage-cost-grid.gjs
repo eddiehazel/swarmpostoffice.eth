@@ -114,15 +114,6 @@ export default class StorageCostGrid extends Component {
 
     const priceInPLUR = this.args.latestPrice;
 
-    console.log('[StorageCost] Price conversion:', {
-      latestPrice: this.args.latestPrice,
-      priceInPLUR,
-    });
-
-    // Small = depth 20 (68MB)
-    // Medium = depth 24 (2.2GB)
-    // Large = depth 30 (70.3GB)
-
     const small_depth = 19;
     const medium_depth = 23;
     const large_depth = 27;
@@ -130,8 +121,6 @@ export default class StorageCostGrid extends Component {
     const small = this.calculateBzzPerGBPerMonth(priceInPLUR, small_depth);
     const medium = this.calculateBzzPerGBPerMonth(priceInPLUR, medium_depth);
     const large = this.calculateBzzPerGBPerMonth(priceInPLUR, large_depth);
-
-    console.log(small, medium, large);
 
     return [
       {
@@ -154,12 +143,7 @@ export default class StorageCostGrid extends Component {
 
   <template>
     <div class="stat-card storage-cost-grid">
-      <div class="stat-label">💾
-        <a
-          href="https://app.uniswap.org/#/swap?inputCurrency=ETH&outputCurrency=0x19062190B1925b5b6689D7073fDfC8c2976EF8Cb"
-          target="_blank"
-          rel="noopener noreferrer"
-        >BZZ</a>/GB-MONTH</div>
+      <div class="stat-label">💾 Price BZZ/GB/MONTH</div>
       <div class="storage-grid">
         {{#each this.storageOptions as |option|}}
           <div class="storage-item">
@@ -169,6 +153,11 @@ export default class StorageCostGrid extends Component {
           </div>
         {{/each}}
       </div>
+      <div class="get-bzz"><a
+          href="https://app.uniswap.org/#/swap?inputCurrency=ETH&outputCurrency=0x19062190B1925b5b6689D7073fDfC8c2976EF8Cb"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Get BZZ on Uniswap</a></div>
     </div>
   </template>
 }

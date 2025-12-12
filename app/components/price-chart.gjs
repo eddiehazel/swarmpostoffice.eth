@@ -276,10 +276,7 @@ export default class PriceChart extends Component {
       .ticks(6)
       .tickFormat(() => ''); // Remove tick labels
 
-    svg
-      .append('g')
-      .attr('class', 'y-axis')
-      .call(yAxis);
+    svg.append('g').attr('class', 'y-axis').call(yAxis);
 
     svg.selectAll('.y-axis path, .y-axis line').style('stroke', '#ddd');
 
