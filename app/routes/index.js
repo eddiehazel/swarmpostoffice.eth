@@ -8,17 +8,21 @@ export default class IndexRoute extends Route {
     const etherscanApi = owner.lookup('service:etherscan-api');
 
     try {
-      // Fetch events
-      const { events, currentBlock } = await etherscanApi.fetchPriceEvents(50);
+      // Fetch only 10 events initially
+      const { events, currentBlock } = await etherscanApi.fetchPriceEvents(10);
 
       if (!events || events.length === 0) {
         return {
           events: [],
           stats: { totalEvents: 0, latestPrice: 0, avgChange: 0 },
           historical: null,
+          dailyPrices: [],
           currentBlock: null,
           newEventHashes: [],
           isLoading: false,
+          isLoadingMore: false,
+          hasMoreEvents: false,
+          totalEventsLoaded: 0,
         };
       }
 
@@ -51,26 +55,96 @@ export default class IndexRoute extends Route {
       // Get historical data
       const historical = await etherscanApi.getHistoricalPrices(currentBlock);
 
-      return {
+      // Get daily prices for the last 30 days
+      const dailyPrices =
+        await etherscanApi.getDailyPricesForMonth(currentBlock);
+
+      // Calculate 24hr change from dailyPrices
+      let dayChange = 0;
+      let dayChangePLUR = '';
+      console.log('[Route] Calculating 24hr change:', {
+        dailyPricesLength: dailyPrices?.length,
+        hasData: dailyPrices && dailyPrices.length >= 2,
+      });
+
+      if (dailyPrices && dailyPrices.length >= 2) {
+        const today = dailyPrices[dailyPrices.length - 1];
+        const yesterday = dailyPrices[dailyPrices.length - 2];
+
+        console.log('[Route] 24hr data:', {
+          today: {
+            price: today?.price,
+            pricePLUR: today?.price ? today.price / 1e18 : 0,
+            timestamp: today?.timestamp,
+          },
+          yesterday: {
+            price: yesterday?.price,
+            pricePLUR: yesterday?.price ? yesterday.price / 1e18 : 0,
+            timestamp: yesterday?.timestamp,
+          },
+        });
+
+        if (today && yesterday && yesterday.price > 0) {
+          const change = today.price - yesterday.price;
+          const changePercent = (change / yesterday.price) * 100;
+          dayChange = changePercent.toFixed(2);
+          const changePLUR = change / 1e16;
+          const sign = changePLUR >= 0 ? '+' : '';
+          // Use more decimals to show meaningful values
+          const absChange = Math.abs(changePLUR);
+          let decimals = 2;
+          if (absChange < 0.01) decimals = 6;
+          else if (absChange < 1) decimals = 4;
+          dayChangePLUR = `${sign}${changePLUR.toFixed(decimals)}`;
+
+          console.log('[Route] 24hr change calculated:', {
+            change,
+            changePercent: dayChange,
+            changePLUR: dayChangePLUR,
+          });
+        } else {
+          console.warn('[Route] Cannot calculate 24hr change:', {
+            hasToday: !!today,
+            hasYesterday: !!yesterday,
+            yesterdayPrice: yesterday?.price,
+          });
+        }
+      }
+
+      const model = {
         events: displayEvents,
         stats: {
           totalEvents,
           latestPrice,
           avgChange,
+          dayChange,
+          dayChangePLUR,
         },
         historical,
+        dailyPrices,
         currentBlock,
         newEventHashes: [],
         isLoading: false,
+        isLoadingMore: false,
+        hasMoreEvents: true, // Assume there are more events
+        totalEventsLoaded: displayEvents.length,
       };
+
+      console.log('[Route] Returning model.stats:', model.stats);
+
+      return model;
     } catch (error) {
       return {
         events: [],
         stats: { totalEvents: 0, latestPrice: 0, avgChange: 0 },
         historical: null,
+        dailyPrices: [],
         currentBlock: null,
         newEventHashes: [],
         isLoading: false,
+        isLoadingMore: false,
+        hasMoreEvents: false,
+        totalEventsLoaded: 0,
         error: error.message,
       };
     }
@@ -78,6 +152,18 @@ export default class IndexRoute extends Route {
 
   setupController(controller, model) {
     super.setupController(controller, model);
+
+    // Add the loadMoreEvents action and controller reference to the model
+    model.loadMoreEventsAction = controller.loadMoreEventsAction;
+    model.controller = controller;
+
+    // Explicitly set the model on the controller to ensure @tracked works
+    controller.model = model;
+
+    // Initialize tracked properties
+    controller.events = model.events || [];
+    controller.totalEventsLoaded = model.totalEventsLoaded || 0;
+    controller.hasMoreEvents = model.hasMoreEvents !== false;
 
     // Set up auto-refresh every 30 seconds
     this.refreshTimer = setInterval(() => {

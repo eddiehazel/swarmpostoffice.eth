@@ -1,27 +1,27 @@
 import StatCard from '../components/stat-card.gjs';
+import StorageCostGrid from '../components/storage-cost-grid.gjs';
 import HistoricalComparison from '../components/historical-comparison.gjs';
+import PriceChart from '../components/price-chart.gjs';
 import EventList from '../components/event-list.gjs';
-import or from '../helpers/or';
 import concat from '../helpers/concat';
 import formatPrice from '../helpers/format-price';
 
 <template>
   <div class="container">
     <div class="header">
-      <h1>📬 Price Update Events Dashboard</h1>
+      <h1>📬 Swarm Post Office 📯</h1>
       <div class="contract-info">
         📮 Contract:
-        <strong>0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b</strong><br />
+        <strong><a
+            href="https://gnosisscan.io/address/0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b"
+          >0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b</a></strong><br />
         🌐 Network:
         <strong>Gnosis Chain</strong>
       </div>
     </div>
 
     <div class="stats">
-      <StatCard
-        @label="📦 Total Events"
-        @value={{or @model.stats.totalEvents "-"}}
-      />
+      <StorageCostGrid @latestPrice={{@model.stats.latestPrice}} />
       <StatCard
         @label="💰 Latest Price"
         @value={{if
@@ -30,14 +30,17 @@ import formatPrice from '../helpers/format-price';
           "-"
         }}
       />
-      <StatCard
-        @label="📊 Avg Change"
-        @value={{if
-          @model.stats.avgChange
-          (concat @model.stats.avgChange "%")
-          "-"
-        }}
-      />
+      <div class="stat-card">
+        <div class="stat-label">📊 24hr Change</div>
+        <div class="stat-value">{{if
+            @model.stats.dayChange
+            (concat @model.stats.dayChange "%")
+            "-"
+          }}</div>
+        {{#if @model.stats.dayChangePLUR}}
+          <div class="stat-sub-value">{{@model.stats.dayChangePLUR}} PLUR</div>
+        {{/if}}
+      </div>
     </div>
 
     {{#if @model.historical}}
@@ -47,11 +50,17 @@ import formatPrice from '../helpers/format-price';
       />
     {{/if}}
 
+    <PriceChart @data={{@model.dailyPrices}} />
+
     <EventList
       @events={{@model.events}}
       @isLoading={{@model.isLoading}}
+      @isLoadingMore={{@model.isLoadingMore}}
       @error={{@model.error}}
       @newEventHashes={{@model.newEventHashes}}
+      @hasMoreEvents={{@model.hasMoreEvents}}
+      @totalEventsLoaded={{@model.totalEventsLoaded}}
+      @onLoadMore={{@model.loadMoreEventsAction}}
     />
   </div>
 </template>

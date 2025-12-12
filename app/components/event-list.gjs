@@ -2,11 +2,12 @@ import EventItem from './event-item.gjs';
 import eq from '../helpers/eq.js';
 import notEq from '../helpers/not-eq.js';
 import includes from '../helpers/includes.js';
+import { on } from '@ember/modifier';
 
 <template>
   <div class="events-container">
     <div class="events-header">
-      <h2 class="events-title">📨 Last 50 Price Updates</h2>
+      <h2 class="events-title">📨 Last {{@totalEventsLoaded}} Price Updates</h2>
       {{#if @isLoading}}
         <div class="refresh-info">Loading...</div>
       {{else}}
@@ -34,6 +35,23 @@ import includes from '../helpers/includes.js';
             @isNew={{includes @newEventHashes event.txHash}}
           />
         {{/each}}
+        {{#if @hasMoreEvents}}
+          <div class="load-more-container">
+            <button
+              type="button"
+              class="load-more-button"
+              disabled={{@isLoadingMore}}
+              {{on "click" @onLoadMore}}
+            >
+              {{#if @isLoadingMore}}
+                <div class="spinner-small"></div>
+                Loading...
+              {{else}}
+                Load 10 More Events
+              {{/if}}
+            </button>
+          </div>
+        {{/if}}
       {{/if}}
     </div>
   </div>
