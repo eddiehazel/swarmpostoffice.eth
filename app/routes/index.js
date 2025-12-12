@@ -20,6 +20,9 @@ export default class IndexRoute extends Route {
           currentBlock: null,
           newEventHashes: [],
           isLoading: false,
+          isLoadingMore: false,
+          hasMoreEvents: false,
+          totalEventsLoaded: 0,
         };
       }
 
@@ -122,6 +125,7 @@ export default class IndexRoute extends Route {
         currentBlock,
         newEventHashes: [],
         isLoading: false,
+        isLoadingMore: false,
         hasMoreEvents: true, // Assume there are more events
         totalEventsLoaded: displayEvents.length,
       };
@@ -138,6 +142,9 @@ export default class IndexRoute extends Route {
         currentBlock: null,
         newEventHashes: [],
         isLoading: false,
+        isLoadingMore: false,
+        hasMoreEvents: false,
+        totalEventsLoaded: 0,
         error: error.message,
       };
     }
@@ -149,6 +156,14 @@ export default class IndexRoute extends Route {
     // Add the loadMoreEvents action and controller reference to the model
     model.loadMoreEventsAction = controller.loadMoreEventsAction;
     model.controller = controller;
+
+    // Explicitly set the model on the controller to ensure @tracked works
+    controller.model = model;
+
+    // Initialize tracked properties
+    controller.events = model.events || [];
+    controller.totalEventsLoaded = model.totalEventsLoaded || 0;
+    controller.hasMoreEvents = model.hasMoreEvents !== false;
 
     // Set up auto-refresh every 30 seconds
     this.refreshTimer = setInterval(() => {

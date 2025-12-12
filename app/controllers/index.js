@@ -1,15 +1,24 @@
 import Controller from '@ember/controller';
 import { tracked } from '@glimmer/tracking';
-import { action } from '@ember/object';
+import { action, set } from '@ember/object';
 import { getOwner } from '@ember/owner';
 import { parseEvent } from '../utils/price-utils';
 
 export default class IndexController extends Controller {
+  @tracked model;
   @tracked previousEventHashes = [];
   @tracked isLoadingMore = false;
+  @tracked events = [];
+  @tracked totalEventsLoaded = 0;
+  @tracked hasMoreEvents = true;
 
   get hasEvents() {
-    return this.model?.events?.length > 0;
+    return this.events?.length > 0;
+  }
+
+  // Getter to expose model events for template reactivity
+  get displayEvents() {
+    return this.model?.events || [];
   }
 
   get loadMoreEventsAction() {
@@ -170,13 +179,18 @@ export default class IndexController extends Controller {
         currentBlock,
         newEventHashes: this.newEventHashes,
         isLoading: false,
-        hasMoreEvents: this.model.hasMoreEvents,
+        isLoadingMore: false,
+        hasMoreEvents: this.hasMoreEvents,
         totalEventsLoaded: displayEvents.length,
       };
 
       console.log('[Controller] Setting model.stats:', model.stats);
 
       this.model = model;
+
+      // Update tracked properties
+      this.events = displayEvents;
+      this.totalEventsLoaded = displayEvents.length;
     } catch (error) {
       this.model = { ...this.model, isLoading: false, error: error.message };
       console.error('Error refreshing data:', error);
@@ -190,18 +204,22 @@ export default class IndexController extends Controller {
 
     try {
       this.isLoadingMore = true;
+      set(this.model, 'isLoadingMore', true);
 
       // Fetch 10 more events than currently loaded
-      const newTotal = this.model.totalEventsLoaded + 10;
+      const newTotal = this.totalEventsLoaded + 10;
+      console.log('[Controller] Loading more events:', {
+        currentTotal: this.totalEventsLoaded,
+        newTotal,
+      });
+
       const { events, currentBlock } =
         await etherscanApi.fetchPriceEvents(newTotal);
 
       if (!events || events.length === 0) {
         this.isLoadingMore = false;
-        this.model = {
-          ...this.model,
-          hasMoreEvents: false,
-        };
+        set(this.model, 'hasMoreEvents', false);
+        set(this.model, 'isLoadingMore', false);
         return;
       }
 
@@ -227,22 +245,44 @@ export default class IndexController extends Controller {
         requested: newTotal,
         received: events.length,
         displayEvents: displayEvents.length,
+        currentEventsLength: this.events?.length,
         hasMoreEvents,
       });
 
-      // Update model with new events
-      this.model = {
-        ...this.model,
-        events: displayEvents,
-        totalEventsLoaded: displayEvents.length,
-        hasMoreEvents,
-        loadMoreEventsAction: this.loadMoreEventsAction,
-        controller: this,
-      };
+      // Update statistics with the latest data
+      const totalEvents = parsedEvents.length;
+      const latestPrice = parsedEvents[parsedEvents.length - 1].price;
+      const changes = parsedEvents
+        .map((e) => parseFloat(e.percentageChange))
+        .filter((c) => c !== 0);
+      const avgChange =
+        changes.length > 0
+          ? (changes.reduce((a, b) => a + b, 0) / changes.length).toFixed(2)
+          : 0;
 
+      // Update model properties directly using set for reactivity
+      set(this.model, 'events', displayEvents);
+      set(this.model.stats, 'totalEvents', totalEvents);
+      set(this.model.stats, 'latestPrice', latestPrice);
+      set(this.model.stats, 'avgChange', avgChange);
+      set(this.model, 'totalEventsLoaded', displayEvents.length);
+      set(this.model, 'hasMoreEvents', hasMoreEvents);
+      set(this.model, 'isLoadingMore', false);
+
+      // Update tracked properties - this will trigger UI updates
+      this.events = displayEvents;
+      this.totalEventsLoaded = displayEvents.length;
+      this.hasMoreEvents = hasMoreEvents;
       this.isLoadingMore = false;
+
+      console.log(
+        '[Controller] Model properties updated:',
+        this.model.events.length,
+        'events'
+      );
     } catch (error) {
       this.isLoadingMore = false;
+      set(this.model, 'isLoadingMore', false);
       console.error('Error loading more events:', error);
     }
   }

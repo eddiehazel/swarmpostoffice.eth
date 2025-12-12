@@ -10,10 +10,12 @@ import { fn } from '@ember/helper';
 <template>
   <div class="container">
     <div class="header">
-      <h1>📬 Price Update Events Dashboard</h1>
+      <h1>📬 Swarm Post Office 📯</h1>
       <div class="contract-info">
         📮 Contract:
-        <strong>0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b</strong><br />
+        <strong><a
+            href="https://gnosisscan.io/address/0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b"
+          >0x47EeF336e7fE5bED98499A4696bce8f28c1B0a8b</a></strong><br />
         🌐 Network:
         <strong>Gnosis Chain</strong>
       </div>
@@ -54,7 +56,7 @@ import { fn } from '@ember/helper';
     <EventList
       @events={{@model.events}}
       @isLoading={{@model.isLoading}}
-      @isLoadingMore={{@model.controller.isLoadingMore}}
+      @isLoadingMore={{@model.isLoadingMore}}
       @error={{@model.error}}
       @newEventHashes={{@model.newEventHashes}}
       @hasMoreEvents={{@model.hasMoreEvents}}
